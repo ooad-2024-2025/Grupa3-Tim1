@@ -1,0 +1,109 @@
+﻿@model IEnumerable<Matchletic.Models.KorisnikSport>
+@{
+    ViewData["Title"] = "Moji sportovi";
+    var dostupniSportovi = ViewBag.DostupniSportovi as List<Matchletic.Models.Sport>;
+}
+
+<div class="bg-white rounded-xl shadow-sm p-6 mb-6 mt-4">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">@ViewData["Title"]</h1>
+        <a href="@Url.Action("Index", "Profil")" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors inline-flex items-center">
+            <i data-feather="chevron-left" class="mr-1" width="16" height="16"></i>
+            Nazad na profil
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Sportovi kojima se bavim</h2>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="space-y-3">
+                @foreach (var sportKorisnika in Model)
+                {
+                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div class="flex items-center">
+                            @if (!string.IsNullOrEmpty(sportKorisnika.Sport.Ikona))
+                            {
+                                <div class="w-8 h-8 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mr-3 text-red-500">
+                                    <span class="text-lg">@sportKorisnika.Sport.Ikona</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                                    <i data-feather="activity" class="text-gray-500" width="16" height="16"></i>
+                                </div>
+                            }
+                            <span class="font-medium text-gray-900">@sportKorisnika.Sport.Naziv</span>
+                        </div>
+                        <form asp-action="UkloniSport" method="post">
+                            <input type="hidden" name="sportId" value="@sportKorisnika.SportID" />
+                            <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
+                                <i data-feather="trash-2" width="18" height="18"></i>
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="bg-yellow-50 text-yellow-800 p-4 rounded-lg">
+                <p>Niste dodali nijedan sport. Dodajte sportove kojima se bavite kako bi vas drugi korisnici lakše pronašli za mečeve.</p>
+            </div>
+        }
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Dostupni sportovi</h2>
+
+        @if (dostupniSportovi != null && dostupniSportovi.Any())
+        {
+            <div class="space-y-3">
+                @foreach (var sport in dostupniSportovi)
+                {
+                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div class="flex items-center">
+                            @if (!string.IsNullOrEmpty(sport.Ikona))
+                            {
+                                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-3 text-blue-500">
+                                    <span class="text-lg">@sport.Ikona</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                                    <i data-feather="activity" class="text-gray-500" width="16" height="16"></i>
+                                </div>
+                            }
+                            <span class="font-medium text-gray-900">@sport.Naziv</span>
+                        </div>
+                        <form asp-action="DodajSport" method="post">
+                            <input type="hidden" name="sportId" value="@sport.SportID" />
+                            <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-600 transition-colors text-sm">
+                                Dodaj
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="bg-gray-50 text-gray-500 p-4 rounded-lg">
+                <p>Nema više dostupnih sportova za dodavanje.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
+}

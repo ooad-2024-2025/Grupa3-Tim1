@@ -1,0 +1,132 @@
+﻿@model List<Matchletic.Models.Mec>
+@{
+    ViewData["Title"] = "Moji mečevi";
+    var currentUserId = ViewBag.CurrentUserId;
+    var currentStatus = ViewBag.CurrentStatus as string;
+    var sportOptions = ViewBag.SportOptions as List<Matchletic.Models.Sport>;
+
+    string statusTitle = "Svi moji mečevi";
+    string statusDescription = "Pregled svih mečeva u kojima učestvujete";
+
+    if (currentStatus == "objavljeni")
+    {
+        statusTitle = "Objavljeni mečevi";
+        statusDescription = "Mečevi koji su objavljeni i traže igrače";
+    }
+    else if (currentStatus == "dogovoreni")
+    {
+        statusTitle = "Dogovoreni mečevi";
+        statusDescription = "Mečevi koji su dogovoreni i čekaju odigravanje";
+    }
+    else if (currentStatus == "zavrseni")
+    {
+        statusTitle = "Završeni mečevi";
+        statusDescription = "Mečevi koji su završeni";
+    }
+}
+
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">@statusTitle</h1>
+    <button type="button" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-colors flex items-center" onclick="openCreateMecModal()">
+        <i data-feather="plus" class="mr-2" width="18" height="18"></i>
+        Kreiraj Meč
+    </button>
+</div>
+
+<div class="mb-6">
+    <div class="bg-white rounded-xl p-6 shadow-sm mb-8">
+        <div class="flex items-center space-x-4">
+            <div class="bg-blue-100 p-3 rounded-lg">
+                <i data-feather="user" class="text-blue-500" width="24" height="24"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900">@statusTitle</h2>
+                <p class="text-gray-600">@statusDescription</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-6 border-b border-gray-200">
+    <nav class="-mb-px flex space-x-8">
+        <a href="@Url.Action("Moji", "Mec")"
+           class="py-4 px-1 border-b-2 @(string.IsNullOrEmpty(currentStatus) ? "border-red-500 text-red-600" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700") font-medium text-sm">
+            Svi
+        </a>
+        <a href="@Url.Action("Moji", "Mec", new { status = "objavljeni" })"
+           class="py-4 px-1 border-b-2 @(currentStatus == "objavljeni" ? "border-red-500 text-red-600" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700") font-medium text-sm">
+            Objavljeni
+        </a>
+        <a href="@Url.Action("Moji", "Mec", new { status = "dogovoreni" })"
+           class="py-4 px-1 border-b-2 @(currentStatus == "dogovoreni" ? "border-red-500 text-red-600" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700") font-medium text-sm">
+            Dogovoreni
+        </a>
+        <a href="@Url.Action("Moji", "Mec", new { status = "zavrseni" })"
+           class="py-4 px-1 border-b-2 @(currentStatus == "zavrseni" ? "border-red-500 text-red-600" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700") font-medium text-sm">
+            Završeni
+        </a>
+    </nav>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var mec in Model)
+        {
+            <partial name="_MatchCard" model="mec" />
+        }
+    }
+    else
+    {
+        <div class="col-span-3 py-12 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-1">Nema mečeva u ovoj kategoriji</h3>
+            <p class="text-gray-500 mb-6 max-w-md mx-auto">
+                @if (currentStatus == "objavljeni")
+                {
+                    <span>Pridružite se nekom objavljenom meču ili kreirajte novi.</span>
+                }
+                else if (currentStatus == "dogovoreni")
+                {
+                    <span>Nemate dogovorenih mečeva. Pridružite se nekom objavljenom meču.</span>
+                }
+                else if (currentStatus == "zavrseni")
+                {
+                    <span>Nemate završenih mečeva.</span>
+                }
+                else
+                {
+                    <span>Nemate mečeva. Pridružite se nekom objavljenom meču ili kreirajte novi.</span>
+                }
+            </p>
+            <button type="button" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-colors inline-flex items-center" onclick="openCreateMecModal()">
+                <i data-feather="plus" class="mr-2" width="18" height="18"></i>
+                Kreiraj meč
+            </button>
+        </div>
+    }
+</div>
+
+<!-- Include the modals -->
+<partial name="_CreateMecModal" model="sportOptions" />
+<partial name="_CompleteMecModal" />
+
+@section Scripts {
+    <script>
+        function openCreateMecModal() {
+            document.getElementById('createMecModal').classList.remove('hidden');
+            feather.replace(); // Re-initialize icons in the modal
+        }
+
+        function closeCreateMecModal() {
+            document.getElementById('createMecModal').classList.add('hidden');
+        }
+
+        // Initialize feather icons when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
+}

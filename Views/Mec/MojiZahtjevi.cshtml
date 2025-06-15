@@ -1,0 +1,82 @@
+﻿@* Views/Mec/MojiZahtjevi.cshtml *@
+@model List<Matchletic.Models.MecRequest>
+@{
+    ViewData["Title"] = "Moji poslani zahtjevi";
+}
+
+<div class="max-w-5xl mx-auto py-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Moji poslani zahtjevi</h1>
+
+    @if (!Model.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center">
+            <div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                <i data-feather="send" class="text-gray-500 dark:text-gray-400" width="24" height="24"></i>
+            </div>
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema poslanih zahtjeva</h2>
+            <p class="text-gray-500 dark:text-gray-400">Trenutno niste poslali zahtjeve za sudjelovanje u mečevima.</p>
+            <a href="@Url.Action("Feed", "Mec")" class="mt-4 inline-flex items-center bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                <i data-feather="search" class="mr-2" width="16" height="16"></i>
+                Pretraži mečeve
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var zahtjev in Model)
+            {
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-semibold text-lg text-gray-900 dark:text-white">@zahtjev.Mec.Naslov</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <i data-feather="user" class="inline-block mr-1" width="14" height="14"></i>
+                                    Kreator: @zahtjev.Mec.Kreator.Ime @zahtjev.Mec.Kreator.Prezime
+                                </p>
+                            </div>
+                            <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 text-xs px-2 py-1 rounded-full font-medium">
+                                Čeka odgovor
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-sm mb-4">
+                            <div>
+                                <span class="block text-gray-500 dark:text-gray-400">Sport</span>
+                                <span class="font-medium text-gray-900 dark:text-white">@zahtjev.Mec.Sport.Naziv</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-500 dark:text-gray-400">Lokacija</span>
+                                <span class="font-medium text-gray-900 dark:text-white">@zahtjev.Mec.Lokacija</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-500 dark:text-gray-400">Datum meča</span>
+                                <span class="font-medium text-gray-900 dark:text-white">@zahtjev.Mec.DatumMeca.ToString("dd.MM.yyyy")</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-500 dark:text-gray-400">Vrijeme meča</span>
+                                <span class="font-medium text-gray-900 dark:text-white">@zahtjev.Mec.DatumMeca.ToString("HH:mm")</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex justify-between items-center text-sm">
+                            <span class="text-gray-500 dark:text-gray-400">Zahtjev poslan: @zahtjev.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")</span>
+                            <a href="@Url.Action("Details", "Mec", new { id = zahtjev.MecID })" class="text-red-500 hover:text-red-700 dark:hover:text-red-400">
+                                Detalji meča
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
+}

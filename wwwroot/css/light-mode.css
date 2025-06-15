@@ -1,0 +1,124 @@
+﻿/* wwwroot/css/light-mode.css */
+
+/* Light Mode Variables */
+.light, [data-theme="light"] {
+    --color-bg-primary: #f9fafb;
+    --color-bg-secondary: #ffffff;
+    --color-text-primary: #111827;
+    --color-text-secondary: #4b5563;
+    --color-border: #e5e7eb;
+    /* Dodatne varijable za light mode */
+    --color-accent: #ef4444; /* red-500 */
+    --color-accent-hover: #dc2626; /* red-600 */
+    --color-accent-light: #fef2f2; /* red-50 */
+    --color-success: #22c55e; /* green-500 */
+    --color-warning: #f59e0b; /* amber-500 */
+    --color-danger: #ef4444; /* red-500 */
+    --color-info: #3b82f6; /* blue-500 */
+    /* Sjenke i elevacija */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+    /* Dodatni light mode stilovi */
+    .light .bg-card, [data-theme="light"] .bg-card {
+        background-color: var(--color-bg-secondary);
+        border: 1px solid var(--color-border);
+    }
+
+    .light .text-primary, [data-theme="light"] .text-primary {
+        color: var(--color-text-primary);
+    }
+
+    .light .text-secondary, [data-theme="light"] .text-secondary {
+        color: var(--color-text-secondary);
+    }
+
+    /* Akcent boje za light mode */
+    .light .accent-bg, [data-theme="light"] .accent-bg {
+        background-color: var(--color-accent);
+        color: white;
+    }
+
+        .light .accent-bg:hover, [data-theme="light"] .accent-bg:hover {
+            background-color: var(--color-accent-hover);
+        }
+
+    .light .accent-light-bg, [data-theme="light"] .accent-light-bg {
+        background-color: var(--color-accent-light);
+        color: var(--color-accent);
+    }
+
+    /* Stilovi za form elemente */
+    .light input, [data-theme="light"] input,
+    .light textarea, [data-theme="light"] textarea,
+    .light select, [data-theme="light"] select {
+        background-color: white;
+        border-color: var(--color-border);
+        color: var(--color-text-primary);
+    }
+
+        .light input:focus, [data-theme="light"] input:focus,
+        .light textarea:focus, [data-theme="light"] textarea:focus,
+        .light select:focus, [data-theme="light"] select:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); /* red-500 s prozirnošću */
+        }
+
+    /* Stilovi za gumbe */
+    .light .btn-primary, [data-theme="light"] .btn-primary {
+        background-color: var(--color-accent);
+        color: white;
+    }
+
+        .light .btn-primary:hover, [data-theme="light"] .btn-primary:hover {
+            background-color: var(--color-accent-hover);
+        }
+
+    .light .btn-outline, [data-theme="light"] .btn-outline {
+        border: 1px solid var(--color-border);
+        background-color: transparent;
+        color: var(--color-text-primary);
+    }
+
+        .light .btn-outline:hover, [data-theme="light"] .btn-outline:hover {
+            background-color: var(--color-bg-primary);
+        }
+
+    /* Stilovi za tablice */
+    .light table, [data-theme="light"] table {
+        border-color: var(--color-border);
+    }
+
+    .light thead, [data-theme="light"] thead {
+        background-color: var(--color-bg-primary);
+    }
+
+    .light tr:nth-child(even), [data-theme="light"] tr:nth-child(even) {
+        background-color: var(--color-bg-primary);
+    }
+
+    /* Stilovi za ikone */
+    .light .icon, [data-theme="light"] .icon {
+        color: var(--color-text-secondary);
+    }
+
+    .light .theme-toggle, [data-theme="light"] .theme-toggle {
+        color: var(--color-text-secondary);
+    }
+
+        .light .theme-toggle:hover, [data-theme="light"] .theme-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+/* wwwroot/css/light-mode.css i wwwroot/css/dark-mode.css */
+.content-padding {
+    padding-top: 4rem; /* 16px - odgovara pt-16 klasi u Tailwind CSS */
+}
+
+/* Za sidebar */
+#sidebar {
+    padding-top: 4rem;
+}

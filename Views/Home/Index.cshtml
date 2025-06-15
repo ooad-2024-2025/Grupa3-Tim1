@@ -1,0 +1,187 @@
+﻿@model List<Matchletic.Models.Mec>
+@{
+    ViewData["Title"] = "Početna";
+    var sportOptions = ViewBag.SportOptions as List<Matchletic.Models.Sport>;
+    var currentUserId = ViewBag.CurrentUserId;
+
+    var objavljeniMecevi = ViewBag.Objavljeni as List<Matchletic.Models.Mec> ?? new List<Matchletic.Models.Mec>();
+    var dogovoreniMecevi = ViewBag.Dogovoreni as List<Matchletic.Models.Mec> ?? new List<Matchletic.Models.Mec>();
+    var zavrseniMecevi = ViewBag.Zavrseni as List<Matchletic.Models.Mec> ?? new List<Matchletic.Models.Mec>();
+
+    var activeTab = ViewBag.ActiveTab ?? "moji-objavljeni";
+
+    // Statistics values - later replace these with actual data from your controller
+    var matchesPlayed = ViewBag.MatchesPlayed ?? 24;
+    var winRate = ViewBag.WinRate ?? 68;
+    var rating = ViewBag.Rating ?? 4.5;
+    var rank = ViewBag.Rank ?? "1,234";
+}
+
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Početna</h1>
+    <!-- U Views/Home/Index.cshtml - zamijenite postojeća dugmad -->
+    <button type="button" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-colors flex items-center" onclick="openCreateMecModal()">
+        <i data-feather="plus" class="mr-2" width="18" height="18"></i>
+        Kreiraj Meč
+    </button>
+</div>
+
+<!-- Brza statistika sekcija - dodano ispod naslova -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-gray-50 p-4 rounded-lg text-center">
+        <h3 class="text-sm font-medium text-gray-500 mb-1">Mečeva odigrano</h3>
+        <p class="text-2xl font-bold text-gray-900">@matchesPlayed</p>
+    </div>
+    <div class="bg-gray-50 p-4 rounded-lg text-center">
+        <h3 class="text-sm font-medium text-gray-500 mb-1">Win Rate</h3>
+        <p class="text-2xl font-bold text-gray-900">@winRate%</p>
+    </div>
+    <div class="bg-gray-50 p-4 rounded-lg text-center">
+        <h3 class="text-sm font-medium text-gray-500 mb-1">Rating</h3>
+        <p class="text-2xl font-bold text-gray-900">@rating</p>
+    </div>
+    <div class="bg-gray-50 p-4 rounded-lg text-center">
+        <h3 class="text-sm font-medium text-gray-500 mb-1">Rank</h3>
+        <p class="text-2xl font-bold text-gray-900">#@rank</p>
+    </div>
+</div>
+
+<div class="flex mb-8">
+    <div class="w-1/3 pr-4">
+        <div class="bg-white rounded-xl shadow-sm p-6 h-full">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Moji mečevi</h2>
+
+            <div class="mb-6">
+                <div class="flex flex-col space-y-2">
+                    <a href="@Url.Action("Moji", "Mec", new { status = "objavljeni" })"
+                       class="flex justify-between items-center px-4 py-2 rounded-lg @(activeTab == "moji-objavljeni" ? "bg-red-50 text-red-500" : "hover:bg-gray-50")">
+                        <span class="flex items-center">
+                            <i data-feather="clock" class="mr-2" width="16" height="16"></i>
+                            Objavljeni
+                        </span>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            @objavljeniMecevi.Count
+                        </span>
+                    </a>
+
+                    <a href="@Url.Action("Moji", "Mec", new { status = "dogovoreni" })"
+                       class="flex justify-between items-center px-4 py-2 rounded-lg @(activeTab == "moji-dogovoreni" ? "bg-red-50 text-red-500" : "hover:bg-gray-50")">
+                        <span class="flex items-center">
+                            <i data-feather="check-circle" class="mr-2" width="16" height="16"></i>
+                            Dogovoreni
+                        </span>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            @dogovoreniMecevi.Count
+                        </span>
+                    </a>
+
+                    <a href="@Url.Action("Moji", "Mec", new { status = "zavrseni" })"
+                       class="flex justify-between items-center px-4 py-2 rounded-lg @(activeTab == "moji-zavrseni" ? "bg-red-50 text-red-500" : "hover:bg-gray-50")">
+                        <span class="flex items-center">
+                            <i data-feather="award" class="mr-2" width="16" height="16"></i>
+                            Završeni
+                        </span>
+                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            @zavrseniMecevi.Count
+                        </span>
+                    </a>
+                </div>
+            </div>
+
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Pregled</h2>
+
+            <div class="flex flex-col space-y-2">
+                <a href="@Url.Action("Feed", "Mec")"
+                   class="flex justify-between items-center px-4 py-2 rounded-lg @(activeTab == "feed" ? "bg-red-50 text-red-500" : "hover:bg-gray-50")">
+                    <span class="flex items-center">
+                        <i data-feather="globe" class="mr-2" width="16" height="16"></i>
+                        Svi objavljeni mečevi
+                    </span>
+                </a>
+
+                <a href="@Url.Action("MojiMecevi", "Mec")"
+                   class="flex justify-between items-center px-4 py-2 rounded-lg @(activeTab == "moji-mecevi" ? "bg-red-50 text-red-500" : "hover:bg-gray-50")">
+                    <span class="flex items-center">
+                        <i data-feather="user" class="mr-2" width="16" height="16"></i>
+                        Mečevi koje sam kreirao
+                    </span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-2/3">
+        @if (activeTab == "feed" || string.IsNullOrEmpty(activeTab))
+        {
+            <div class="mb-4">
+                <h2 class="text-xl font-semibold text-gray-900">Objavljeni mečevi</h2>
+                <p class="text-gray-600">Pregledajte sve dostupne mečeve koje su objavili korisnici</p>
+            </div>
+        }
+        else if (activeTab == "moji-objavljeni")
+        {
+            <div class="mb-4">
+                <h2 class="text-xl font-semibold text-gray-900">Moji objavljeni mečevi</h2>
+                <p class="text-gray-600">Mečevi koje ste objavili i čekaju igrače</p>
+            </div>
+        }
+        else if (activeTab == "moji-dogovoreni")
+        {
+            <div class="mb-4">
+                <h2 class="text-xl font-semibold text-gray-900">Moji dogovoreni mečevi</h2>
+                <p class="text-gray-600">Mečevi koji su dogovoreni i čekaju odigravanje</p>
+            </div>
+        }
+        else if (activeTab == "moji-zavrseni")
+        {
+            <div class="mb-4">
+                <h2 class="text-xl font-semibold text-gray-900">Moji završeni mečevi</h2>
+                <p class="text-gray-600">Mečevi koje ste završili</p>
+            </div>
+        }
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var mec in Model)
+                {
+                    <partial name="_MatchCard" model="mec" />
+                }
+            }
+            else
+            {
+                <div class="col-span-2 py-12 text-center bg-white rounded-xl shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">Nema dostupnih mečeva</h3>
+                    <p class="text-gray-500 mb-6 max-w-md mx-auto">Trenutno nema aktivnih mečeva. Kreirajte novi meč ili pokušajte kasnije.</p>
+                    <!-- U Views/Home/Index.cshtml - zamijenite postojeća dugmad -->
+                    <button type="button" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-colors flex items-center" onclick="openCreateMecModal()">
+                        <i data-feather="plus" class="mr-2" width="18" height="18"></i>
+                        Kreiraj Meč
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function openCreateMecModal() {
+            document.getElementById('createMecModal').classList.remove('hidden');
+            feather.replace(); // Re-initialize icons in the modal
+        }
+
+        function closeCreateMecModal() {
+            document.getElementById('createMecModal').classList.add('hidden');
+        }
+
+        // Initialize feather icons when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
+}

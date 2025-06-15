@@ -1,0 +1,257 @@
+﻿@model List<Matchletic.Models.Korisnik>
+@{
+    ViewData["Title"] = "Administrator";
+    var activeTab = ViewBag.ActiveTab ?? "users";
+    var mecevi = ViewBag.Mecevi as List<Matchletic.Models.Mec> ?? new List<Matchletic.Models.Mec>();
+}
+
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">
+        Administratorska ploča
+    </h1>
+    <div class="space-x-4">
+        <a href="@Url.Action("Index", "Administrator", new { tab = "users" })"
+           class="font-medium text-sm px-4 py-2 rounded-full @(activeTab == "users" ? "bg-red-100 text-red-700" : "text-gray-700 hover:bg-gray-100")">
+            Korisnici
+        </a>
+        <a href="@Url.Action("Index", "Administrator", new { tab = "matches" })"
+           class="font-medium text-sm px-4 py-2 rounded-full @(activeTab == "matches" ? "bg-red-100 text-red-700" : "text-gray-700 hover:bg-gray-100")">
+            Mečevi
+        </a>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 class="text-lg font-semibold text-gray-900">
+                @(activeTab == "users" ? "Svi korisnici" : "Svi mečevi")
+            </h2>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative">
+                    <input type="text"
+                           placeholder="Pretraži..."
+                           id="searchInput"
+                           class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+
+                <div class="relative">
+                    <button type="button" class="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        <span>Filter</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="users-tab" class="p-6 @(activeTab != "users" ? "hidden" : "")">
+        <div class="space-y-4">
+            @foreach (var user in Model)
+            {
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="flex items-center mb-4 md:mb-0">
+                            @if (!string.IsNullOrEmpty(user.ProfilnaSlika))
+                            {
+                                <img src="@user.ProfilnaSlika"
+                                     alt="@user.Ime"
+                                     class="w-12 h-12 rounded-full mr-4 object-cover" />
+                            }
+                            else
+                            {
+                                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-4">
+                                    <span class="text-xl font-medium text-gray-500">@(user.Ime?.FirstOrDefault() ?? '?')</span>
+                                </div>
+                            }
+                            <div>
+                                <h3 class="font-medium text-gray-900">@user.Ime @user.Prezime</h3>
+                                <p class="text-sm text-gray-500">@user.Email</p>
+                                <div class="flex items-center mt-1 text-gray-500 text-sm">
+                                    <span class="inline-flex items-center">
+                                        <svg class="h-4 w-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                        @user.Ocjena.ToString("0.0")
+                                    </span>
+                                    <span class="mx-2">•</span>
+                                    <span>
+                                        @{
+                                            var sportovi = user.KorisnickiSportovi?.Select(ks => ks.Sport?.Naziv).Where(s => !string.IsNullOrEmpty(s)).ToList() ?? new List<string>();
+                                            @string.Join(", ", sportovi)
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-2">
+                            <a href="@Url.Action("SendNotification", "Administrator", new { id = user.KorisnikID })"
+                               class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-full transition-colors text-sm font-medium flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Pošalji obavijest
+                            </a>
+                            <a href="@Url.Action("RestrictUser", "Administrator", new { id = user.KorisnikID })"
+                               class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-full transition-colors text-sm font-medium flex items-center"
+                               onclick="return confirm('Jeste li sigurni da želite ograničiti ovog korisnika?')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                </svg>
+                                Ograniči korisnika
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div id="matches-tab" class="p-6 @(activeTab != "matches" ? "hidden" : "")">
+        <div class="space-y-4">
+            @if (mecevi.Any())
+            {
+                @foreach (var match in mecevi)
+                {
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between">
+                            <div class="flex items-center mb-4 md:mb-0">
+                                @{
+                                    var kreator = Model.FirstOrDefault(u => u.KorisnikID == match.KreatorID);
+                                }
+
+                                @if (kreator != null && !string.IsNullOrEmpty(kreator.ProfilnaSlika))
+                                {
+                                    <img src="@kreator.ProfilnaSlika"
+                                         alt="@kreator.Ime"
+                                         class="w-12 h-12 rounded-full mr-4 object-cover" />
+                                }
+                                else
+                                {
+                                    <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-4">
+                                        <span class="text-xl font-medium text-gray-500">
+                                            @(kreator?.Ime?.FirstOrDefault() ?? '?')
+                                        </span>
+                                    </div>
+                                }
+                                <div>
+                                    <h3 class="font-medium text-gray-900">
+                                        @(kreator != null ? $"{kreator.Ime} {kreator.Prezime}" : "Nepoznat korisnik")
+                                    </h3>
+                                    <div class="flex items-center text-gray-600 text-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span>@match.DatumMeca.ToString("dd.MM.yyyy")</span>
+                                    </div>
+                                    <div class="flex items-center text-gray-600 text-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>@match.DatumMeca.ToString("HH:mm")</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-end">
+                                <div class="rounded-full px-2.5 py-1 text-xs font-medium mb-2"
+                                     style="@(match.Status == StatusMeca.Zavrsen ? "background-color: #E8F5E9; color: #2E7D32" :
+                                           match.Status == StatusMeca.Dogovoren ? "background-color: #FFF8E1; color: #F57C00" :
+                                           "background-color: #E3F2FD; color: #1565C0")">
+                                    @match.Status
+                                </div>
+                                <div class="text-sm font-medium uppercase text-gray-700">
+                                    @match.Naslov
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <div class="text-sm text-gray-500">Lokacija</div>
+                                <div class="font-medium">
+                                    @(match.Lokacija ?? "Nije određeno")
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">Igrači</div>
+                                <div class="font-medium">
+                                    @(match.KorisniciMeca?.Count ?? 0) / @match.BrojIgraca
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">Rezultat</div>
+                                <div class="font-medium">@(string.IsNullOrEmpty(match.Rezultat) ? "-" : match.Rezultat)</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex justify-end space-x-2">
+                            <a href="@Url.Action("Edit", "Mec", new { id = match.MecID, admin = true })"
+                               class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full transition-colors text-sm font-medium">
+                                Uredi
+                            </a>
+                            <a href="@Url.Action("Delete", "Mec", new { id = match.MecID, admin = true })"
+                               class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-full transition-colors text-sm font-medium flex items-center"
+                               onclick="return confirm('Jeste li sigurni da želite izbrisati ovaj meč?')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Izbriši
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">Nema mečeva</h3>
+                    <p class="mt-1 text-sm text-gray-500">Trenutno nema aktivnih mečeva u sustavu.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+
+            // Search in users tab
+            const usersItems = document.querySelectorAll('#users-tab .border');
+            usersItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Search in matches tab
+            const matchesItems = document.querySelectorAll('#matches-tab .border');
+            matchesItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35919.96
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matchletic", "Matchletic.csproj", "{479EEE6B-E340-4310-B91A-267F118C4CF3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{479EEE6B-E340-4310-B91A-267F118C4CF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{479EEE6B-E340-4310-B91A-267F118C4CF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{479EEE6B-E340-4310-B91A-267F118C4CF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{479EEE6B-E340-4310-B91A-267F118C4CF3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {73294260-0767-48AB-A145-E56A4D3B435B}
+	EndGlobalSection
+EndGlobal

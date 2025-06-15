@@ -1,0 +1,140 @@
+﻿@* Views/Mec/ZahtjeviZaMec.cshtml *@
+@model List<Matchletic.Models.MecRequest>
+@{
+    ViewData["Title"] = ViewBag.MecId != null ? $"Zahtjevi za meč {ViewBag.MecNaslov}" : "Zahtjevi za mečeve";
+}
+
+<div class="max-w-5xl mx-auto py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+            @(ViewBag.MecId != null ? $"Zahtjevi za meč {ViewBag.MecNaslov}" : "Zahtjevi za mečeve")
+        </h1>
+
+        @if (ViewBag.MecId != null)
+        {
+            <a href="@Url.Action("Details", "Mec", new { id = ViewBag.MecId })" class="text-red-500 hover:text-red-700 flex items-center">
+                <i data-feather="arrow-left" class="mr-2" width="16" height="16"></i>
+                Natrag na meč
+            </a>
+        }
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
+            <div class="flex items-center">
+                <i data-feather="check-circle" class="mr-2" width="20" height="20"></i>
+                <p>@TempData["SuccessMessage"]</p>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+            <div class="flex items-center">
+                <i data-feather="alert-circle" class="mr-2" width="20" height="20"></i>
+                <p>@TempData["ErrorMessage"]</p>
+            </div>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center">
+            <div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                <i data-feather="inbox" class="text-gray-500 dark:text-gray-400" width="24" height="24"></i>
+            </div>
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema zahtjeva</h2>
+            <p class="text-gray-500 dark:text-gray-400">Trenutno nema novih zahtjeva za sudjelovanje u vašim mečevima.</p>
+        </div>
+    }
+    else
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Korisnik
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Meč
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Datum zahtjeva
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Akcije
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach (var zahtjev in Model)
+                        {
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        @if (!string.IsNullOrEmpty(zahtjev.Korisnik.ProfilnaSlika))
+                                        {
+                                            <img class="h-10 w-10 rounded-full object-cover" src="@zahtjev.Korisnik.ProfilnaSlika" alt="@zahtjev.Korisnik.Ime">
+                                        }
+                                        else
+                                        {
+                                            <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                                <span class="text-gray-600 dark:text-gray-300 font-bold">@zahtjev.Korisnik.Ime.Substring(0, 1)</span>
+                                            </div>
+                                        }
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                @zahtjev.Korisnik.Ime @zahtjev.Korisnik.Prezime
+                                            </div>
+                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                @zahtjev.Korisnik.Email
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">@zahtjev.Mec.Naslov</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">@zahtjev.Mec.Sport.Naziv</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 dark:text-white">@zahtjev.DatumKreiranja.ToString("dd.MM.yyyy")</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">@zahtjev.DatumKreiranja.ToString("HH:mm")</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <form asp-action="PrihvatiZahtjev" method="post">
+                                            <input type="hidden" name="id" value="@zahtjev.MecRequestID" />
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md transition-colors">
+                                                Prihvati
+                                            </button>
+                                        </form>
+                                        <form asp-action="OdbijZahtjev" method="post">
+                                            <input type="hidden" name="id" value="@zahtjev.MecRequestID" />
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md transition-colors">
+                                                Odbij
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
+}

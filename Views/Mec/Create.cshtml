@@ -1,0 +1,244 @@
+﻿@model Matchletic.Models.Mec
+
+@{
+    ViewData["Title"] = "Kreiraj novi meč";
+}
+
+<div class="max-w-3xl mx-auto py-8">
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Kreiraj novi meč</h1>
+            <p class="text-gray-600">Popunite podatke za kreiranje novog meča.</p>
+        </div>
+        <a asp-action="Index" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors inline-flex items-center">
+            <i data-feather="chevron-left" class="mr-2" width="16" height="16"></i>
+            Nazad
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-8">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-red-500 mb-4"></div>
+
+            <!-- Prvi red - Naslov i Sport -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <label asp-for="Naslov" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i data-feather="file-text" class="inline-block mr-2 text-gray-500" width="16" height="16"></i>
+                        Naslov
+                    </label>
+                    <input asp-for="Naslov" required placeholder="Unesite naslov meča" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+                    <span asp-validation-for="Naslov" class="text-red-500 text-sm"></span>
+                </div>
+
+                <div>
+                    <label asp-for="SportID" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i data-feather="activity" class="inline-block mr-2 text-gray-500" width="16" height="16"></i>
+                        Sport
+                    </label>
+                    <select asp-for="SportID" asp-items="ViewBag.Sports" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <option value="">Odaberite sport</option>
+                    </select>
+                    <span asp-validation-for="SportID" class="text-red-500 text-sm"></span>
+                </div>
+            </div>
+
+            <!-- Drugi red - Datum i Vrijeme -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <label asp-for="DatumMeca" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i data-feather="calendar" class="inline-block mr-2 text-gray-500" width="16" height="16"></i>
+                        Datum meča
+                    </label>
+                    <div class="relative">
+                        <input asp-for="DatumMeca" type="date" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+                        <span asp-validation-for="DatumMeca" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="VrijemeMeca" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i data-feather="clock" class="inline-block mr-2 text-gray-500" width="16" height="16"></i>
+                        Vrijeme meča <span class="text-xs text-gray-400">(24h)</span>
+                    </label>
+                    <div class="relative">
+                        <select id="VrijemeMeca" name="VrijemeMeca" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            @for (int i = 0; i < 24; i++)
+                            {
+                                for (int j = 0; j < 60; j += 30)
+                                {
+                                    var hour = i.ToString("00");
+                                    var minute = j.ToString("00");
+                                    var timeValue = $"{hour}:{minute}";
+                                    var isSelected = (Model.DatumMeca.Hour == i && (Model.DatumMeca.Minute >= j && Model.DatumMeca.Minute < j + 30));
+
+                                    if (isSelected)
+                                    {
+                                        <option value="@timeValue" selected>@timeValue</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@timeValue">@timeValue</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Treći red - Lokacija i Broj igrača -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <label asp-for="Lokacija" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i data-feather="map-pin" class="inline-block mr-2 text-gray-500" width="16" height="16"></i>
+                        Lokacija
+                    </label>
+                    <div class="relative">
+                        <input asp-for="Lokacija" required placeholder="Gdje će se meč održati?" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+                        <span asp-validation-for="Lokacija" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="BrojIgraca" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i data-feather="users" class="inline-block mr-2 text-gray-500" width="16" height="16"></i>
+                        Potreban broj igrača
+                    </label>
+                    <div class="relative">
+                        <input asp-for="BrojIgraca" type="number" min="2" max="50" required value="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+                        <span asp-validation-for="BrojIgraca" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opis -->
+            <div class="mb-8">
+                <label asp-for="Opis" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i data-feather="file" class="inline-block mr-2 text-gray-500" width="16" height="16"></i>
+                    Opis
+                </label>
+                <textarea asp-for="Opis" rows="4" placeholder="Detalji o meču" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"></textarea>
+                <span asp-validation-for="Opis" class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- Dugmad -->
+            <div class="flex space-x-4 pt-4">
+                <a asp-action="Index" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-2 rounded-full transition-colors flex-1 text-center font-semibold">
+                    Odustani
+                </a>
+                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full transition-colors flex-1 font-semibold shadow-md">
+                    Kreiraj meč
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize feather icons
+            feather.replace();
+
+            // Get elements
+            const dateInput = document.querySelector('[asp-for="DatumMeca"]');
+            const timeSelect = document.getElementById('VrijemeMeca');
+
+            // Function to combine date and time
+            function combineDateTime() {
+                // Get the selected date and time
+                const selectedDate = dateInput.value;
+                const selectedTime = timeSelect.value;
+
+                // If both have values
+                if (selectedDate && selectedTime) {
+                    // Create a hidden input to store the combined datetime
+                    let hiddenInput = document.getElementById('CombinedDateTime');
+                    if (!hiddenInput) {
+                        hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'DatumMeca';
+                        hiddenInput.id = 'CombinedDateTime';
+                        dateInput.parentNode.appendChild(hiddenInput);
+                    }
+
+                    // Set the value in ISO format
+                    hiddenInput.value = `${selectedDate}T${selectedTime}`;
+
+                    // Change the original date input name to avoid duplication
+                    dateInput.name = 'DatumMeca_Date';
+                }
+            }
+
+            // Add event listeners to both inputs
+            dateInput.addEventListener('change', combineDateTime);
+            timeSelect.addEventListener('change', combineDateTime);
+
+            // Set today as minimum date
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            dateInput.min = `${year}-${month}-${day}`;
+
+            // Set initial form state based on the model data
+            if (dateInput.value) {
+                // Parse initial datetime from model
+                const initialDate = new Date('@Model.DatumMeca.ToString("yyyy-MM-ddTHH:mm:ss")');
+
+                // Format the date part for the date input
+                const year = initialDate.getFullYear();
+                const month = (initialDate.getMonth() + 1).toString().padStart(2, '0');
+                const day = initialDate.getDate().toString().padStart(2, '0');
+                dateInput.value = `${year}-${month}-${day}`;
+
+                // Set the time dropdown to the closest half hour
+                const hours = initialDate.getHours().toString().padStart(2, '0');
+                const minutes = (initialDate.getMinutes() < 30 ? '00' : '30');
+                const timeValue = `${hours}:${minutes}`;
+
+                // Find and select the option
+                for (let i = 0; i < timeSelect.options.length; i++) {
+                    if (timeSelect.options[i].value === timeValue) {
+                        timeSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            } else {
+                // Set default time to current time rounded to next half hour
+                const now = new Date();
+                now.setMinutes(now.getMinutes() + 30);
+                const roundedMinutes = now.getMinutes() < 30 ? 30 : 0;
+                const hours = now.getHours() + (now.getMinutes() >= 30 ? 1 : 0);
+                if (roundedMinutes === 0 && now.getMinutes() >= 30) {
+                    now.setHours(hours % 24);
+                }
+                now.setMinutes(roundedMinutes);
+
+                // Set default date to tomorrow
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowYear = tomorrow.getFullYear();
+                const tomorrowMonth = (tomorrow.getMonth() + 1).toString().padStart(2, '0');
+                const tomorrowDay = tomorrow.getDate().toString().padStart(2, '0');
+                dateInput.value = `${tomorrowYear}-${tomorrowMonth}-${tomorrowDay}`;
+
+                // Set default time
+                const timeValue = `${now.getHours().toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
+                for (let i = 0; i < timeSelect.options.length; i++) {
+                    if (timeSelect.options[i].value === timeValue) {
+                        timeSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // Initialize the combined value
+            combineDateTime();
+        });
+    </script>
+}

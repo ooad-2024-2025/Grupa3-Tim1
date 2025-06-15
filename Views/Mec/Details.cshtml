@@ -1,0 +1,296 @@
+﻿@model Matchletic.Models.Mec
+
+@{
+    ViewData["Title"] = "Detalji meča";
+    var currentUserId = ViewBag.CurrentUserId;
+    var isCreator = Model.KreatorID == currentUserId;
+    var isInMatch = Model.KorisniciMeca?.Any(km => km.KorisnikID == currentUserId) ?? false;
+}
+
+<div class="max-w-4xl mx-auto py-8">
+    <div class="mb-6">
+        <a href="@Url.Action("MojiMecevi")" class="inline-flex items-center text-gray-500 hover:text-gray-800">
+            <i data-feather="arrow-left" class="mr-2" width="16" height="16"></i>
+            Nazad na popis
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+        <!-- Header sekcija -->
+        <div class="bg-red-500 h-32 relative">
+            <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent text-white">
+                <div class="flex justify-between items-end">
+                    <h1 class="text-3xl font-bold">@Model.Naslov</h1>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                          @(Model.Status == StatusMeca.Objavljen ? "bg-blue-100 text-blue-800" :
+                             Model.Status == StatusMeca.Dogovoren ? "bg-yellow-100 text-yellow-800" :
+                             "bg-green-100 text-green-800")">
+                        @Model.Status
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <!-- Informacije o kreatoru i datumu -->
+            <div class="flex items-center text-gray-600 mb-6">
+                <div class="flex items-center mr-6">
+                    <i data-feather="user" class="mr-2 text-gray-400" width="16" height="16"></i>
+                    <span>Kreator: @(Model.Kreator?.Ime ?? "Nepoznat") @(Model.Kreator?.Prezime ?? "korisnik")</span>
+                </div>
+                <div class="flex items-center">
+                    <i data-feather="calendar" class="mr-2 text-gray-400" width="16" height="16"></i>
+                    <span>Kreirano: @Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
+                </div>
+            </div>
+
+            <!-- Opis meča -->
+            @if (!string.IsNullOrEmpty(Model.Opis))
+            {
+                <div class="mb-8 bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-700 mb-2">Opis</h3>
+                    <p class="text-gray-900 whitespace-pre-line">@Model.Opis</p>
+                </div>
+            }
+
+            <!-- Kartice s informacijama -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gray-50 rounded-lg p-5">
+                    <div class="flex items-center mb-3">
+                        <i data-feather="map-pin" class="mr-3 text-red-500" width="20" height="20"></i>
+                        <h3 class="font-semibold text-gray-700">Lokacija</h3>
+                    </div>
+                    <p class="text-gray-900">@Model.Lokacija</p>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-5">
+                    <div class="flex items-center mb-3">
+                        <i data-feather="activity" class="mr-3 text-red-500" width="20" height="20"></i>
+                        <h3 class="font-semibold text-gray-700">Sport</h3>
+                    </div>
+                    <p class="text-gray-900">@(Model.Sport?.Naziv ?? "Nepoznat sport")</p>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-5">
+                    <div class="flex items-center mb-3">
+                        <i data-feather="users" class="mr-3 text-red-500" width="20" height="20"></i>
+                        <h3 class="font-semibold text-gray-700">Igrači</h3>
+                    </div>
+                    <p class="text-gray-900">@(Model.KorisniciMeca?.Count ?? 0) / @Model.BrojIgraca</p>
+                </div>
+            </div>
+
+            <!-- Dodatne informacije -->
+            <div class="mb-8 bg-gray-50 p-5 rounded-lg">
+                <div class="flex items-center mb-3">
+                    <i data-feather="clock" class="mr-3 text-red-500" width="20" height="20"></i>
+                    <h3 class="font-semibold text-gray-700">Vrijeme održavanja</h3>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-8">
+                    <div class="flex items-center mb-2 md:mb-0">
+                        <i data-feather="calendar" class="mr-2 text-gray-400" width="16" height="16"></i>
+                        <span>@Model.DatumMeca.ToString("dd.MM.yyyy")</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i data-feather="clock" class="mr-2 text-gray-400" width="16" height="16"></i>
+                        <span>@Model.DatumMeca.ToString("HH:mm")</span>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Status == StatusMeca.Zavrsen && !string.IsNullOrEmpty(Model.Rezultat))
+            {
+                <div class="mb-8 bg-green-50 p-5 rounded-lg border border-green-100">
+                    <div class="flex items-center mb-3">
+                        <i data-feather="award" class="mr-3 text-green-500" width="20" height="20"></i>
+                        <h3 class="font-semibold text-gray-700">Rezultat</h3>
+                    </div>
+                    <p class="text-gray-900 text-lg font-semibold">@Model.Rezultat</p>
+                </div>
+            }
+
+            <!-- U Details.cshtml - dio za Akcijska dugmad -->
+            <!-- U Details.cshtml - dio za Akcijska dugmad -->
+            <div class="flex flex-wrap gap-3 mt-8">
+                @if (Model.Status == StatusMeca.CekaPrihvacanje && Model.KorisniciMeca.Any(km => km.KorisnikID == ViewBag.CurrentUserId && !km.JePrihvacen))
+                {
+                    <div class="flex-grow text-center bg-orange-50 p-4 rounded-lg border border-orange-200 mb-4">
+                        <p class="font-medium text-orange-700 mb-2">Primili ste izazov za ovaj meč!</p>
+                        <div class="flex justify-center space-x-3">
+                            <form asp-action="AcceptChallenge" asp-controller="Mec" method="post">
+                                <input type="hidden" name="id" value="@Model.MecID" />
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                                    <i data-feather="check" class="mr-2 inline" width="16" height="16"></i>
+                                    Prihvati izazov
+                                </button>
+                            </form>
+
+                            <form asp-action="RejectChallenge" asp-controller="Mec" method="post">
+                                <input type="hidden" name="id" value="@Model.MecID" />
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                                    <i data-feather="x" class="mr-2 inline" width="16" height="16"></i>
+                                    Odbij izazov
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                @if (Model.Status == StatusMeca.CekaPrihvacanje && Model.KreatorID == ViewBag.CurrentUserId)
+                {
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 w-full mb-4">
+                        <p class="text-blue-700 font-medium">Čeka se da izazvani igrač prihvati ovaj izazov.</p>
+                    </div>
+                }
+
+                @if (Model.Status == StatusMeca.Objavljen && !isCreator && !isInMatch)
+                {
+                    <form asp-action="Join" asp-controller="Mec" method="post" class="flex-grow md:flex-grow-0">
+                        <input type="hidden" name="id" value="@Model.MecID" />
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-colors w-full md:w-auto font-medium">
+                            <i data-feather="user-plus" class="mr-2 inline" width="16" height="16"></i>
+                            Pridruži se
+                        </button>
+                    </form>
+                }
+
+                @if (isCreator && Model.Status == StatusMeca.Dogovoren)
+                {
+                    <button onclick="showCompleteMecModal(@Model.MecID)" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                        <i data-feather="check-circle" class="mr-2 inline" width="16" height="16"></i>
+                        Završi meč
+                    </button>
+                }
+
+                @if (isCreator && Model.Status != StatusMeca.Zavrsen)
+                {
+                    <a href="@Url.Action("Edit", "Mec", new { id = Model.MecID })" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg transition-colors font-medium">
+                        <i data-feather="edit-2" class="mr-2 inline" width="16" height="16"></i>
+                        Uredi
+                    </a>
+                }
+
+                @if (Model.Status == StatusMeca.Zavrsen && isInMatch && !Model.Recenzije.Any(r => r.AutorID == ViewBag.CurrentUserId))
+                {
+                    <a href="@Url.Action("Create", "Recenzija", new { mecId = Model.MecID })" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                        <i data-feather="star" class="mr-2 inline" width="16" height="16"></i>
+                        Ocijeni meč
+                    </a>
+                }
+                @if (Model.Status == StatusMeca.Objavljen &&
+                Model.KreatorID != ViewBag.CurrentUserId &&
+                !Model.KorisniciMeca.Any(km => km.KorisnikID == ViewBag.CurrentUserId) &&
+                !ViewBag.ZahtjevPoslan)
+                {
+                    <form asp-action="PosaljiZahtjev" asp-controller="Mec" method="post" class="flex-grow md:flex-grow-0">
+                        <input type="hidden" name="id" value="@Model.MecID" />
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors w-full md:w-auto font-medium">
+                            <i data-feather="send" class="mr-2 inline" width="16" height="16"></i>
+                            Pošalji zahtjev
+                        </button>
+                    </form>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    @if (Model.KorisniciMeca != null && Model.KorisniciMeca.Any())
+    {
+        <div class="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <i data-feather="users" class="mr-3 text-red-500" width="24" height="24"></i>
+                Igrači (@Model.KorisniciMeca.Count)
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                @foreach (var mecKorisnik in Model.KorisniciMeca)
+                {
+                    <div class="flex items-center bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                        @if (!string.IsNullOrEmpty(mecKorisnik.Korisnik?.ProfilnaSlika))
+                        {
+                            <img src="@mecKorisnik.Korisnik.ProfilnaSlika" alt="@mecKorisnik.Korisnik.Ime" class="w-12 h-12 rounded-full mr-3 object-cover border-2 border-white shadow" />
+                        }
+                        else
+                        {
+                            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-3 border-2 border-white shadow">
+                                <span class="text-red-500 font-bold">@(mecKorisnik.Korisnik?.Ime.FirstOrDefault() ?? '?')</span>
+                            </div>
+                        }
+                        <div>
+                            <div class="font-medium text-gray-900">@(mecKorisnik.Korisnik?.Ime ?? "Nepoznat") @(mecKorisnik.Korisnik?.Prezime ?? "korisnik")</div>
+                            <div class="text-sm text-gray-500 flex items-center">
+                                <i data-feather="clock" class="mr-1" width="12" height="12"></i>
+                                @mecKorisnik.DatumMeca.ToString("dd.MM.yyyy HH:mm")
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model.Recenzije != null && Model.Recenzije.Any())
+    {
+        <div class="bg-white rounded-xl shadow-sm p-6 md:p-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <i data-feather="star" class="mr-3 text-yellow-500" width="24" height="24"></i>
+                Recenzije (@Model.Recenzije.Count)
+            </h2>
+
+            <div class="space-y-6">
+                @foreach (var recenzija in Model.Recenzije)
+                {
+                    <div class="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+                        <div class="flex items-center mb-3">
+                            @if (!string.IsNullOrEmpty(recenzija.Autor?.ProfilnaSlika))
+                            {
+                                <img src="@recenzija.Autor.ProfilnaSlika" alt="@recenzija.Autor.Ime" class="w-10 h-10 rounded-full mr-3 object-cover border-2 border-white shadow" />
+                            }
+                            else
+                            {
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 border-2 border-white shadow">
+                                    <span class="text-blue-500 font-bold">@(recenzija.Autor?.Ime.FirstOrDefault() ?? '?')</span>
+                                </div>
+                            }
+                            <div>
+                                <div class="font-medium text-gray-900">@(recenzija.Autor?.Ime ?? "Nepoznat") @(recenzija.Autor?.Prezime ?? "korisnik")</div>
+                                <div class="flex text-yellow-400">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i data-feather="@(i <= recenzija.Ocjena ? "star" : "star")" class="@(i <= recenzija.Ocjena ? "text-yellow-400" : "text-gray-300")" width="16" height="16"></i>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ml-13 pl-10">
+                            <p class="text-gray-700 bg-gray-50 p-4 rounded-lg rounded-tl-none">@recenzija.Komentar</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<partial name="_CompleteMecModal" />
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+
+        function showCompleteMecModal(mecId) {
+            document.getElementById('completeMecForm').action = '@Url.Action("MarkAsCompleted", "Mec")/' + mecId;
+            document.getElementById('completeMecModal').classList.remove('hidden');
+        }
+
+        function closeCompleteMecModal() {
+            document.getElementById('completeMecModal').classList.add('hidden');
+        }
+    </script>
+}

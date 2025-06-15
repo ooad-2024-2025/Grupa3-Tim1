@@ -1,0 +1,104 @@
+﻿@* Views/Shared/_NotificationPartial.cshtml *@@using Matchletic.Models
+@using Matchletic.Helpers
+@inject Matchletic.Services.NotifikacijaService NotifikacijaService
+
+@{
+    var korisnikID = Context.Session.GetInt32("KorisnikID");
+    int brojNotifikacija = 0;
+    List<Notifikacija> notifikacije = new List<Notifikacija>();
+
+    if (korisnikID.HasValue)
+    {
+        brojNotifikacija = await NotifikacijaService.GetBrojNeprocitanihNotifikacijaAsync(korisnikID.Value);
+        notifikacije = await NotifikacijaService.GetNotifikacijeZaKorisnikaAsync(korisnikID.Value, 5);
+    }
+}
+
+<div class="relative">
+    <button id="notificationButton" type="button" class="text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 relative">
+        <i data-feather="bell" width="22" height="22"></i>
+        @if (brojNotifikacija > 0)
+        {
+            <span class="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                @brojNotifikacija
+            </span>
+        }
+    </button>
+
+    <div id="notificationDropdown" class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg hidden z-10 overflow-hidden">
+        <div class="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="font-semibold text-gray-800 dark:text-white">Notifikacije</h3>
+            @if (notifikacije.Any(n => !n.Procitano))
+            {
+                <form asp-controller="Notifikacija" asp-action="OznaciSveKaoProcitano" method="post">
+                    <button type="submit" class="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400">
+                        Označi sve kao pročitano
+                    </button>
+                </form>
+            }
+        </div>
+
+        <div class="max-h-64 overflow-y-auto">
+            @if (notifikacije.Any())
+            {
+                foreach (var notifikacija in notifikacije)
+                {
+                    <a href="@notifikacija.Url"
+                       class="block px-4 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition @(!notifikacija.Procitano ? "bg-blue-50 dark:bg-blue-900/20" : "")"
+                       data-notification-id="@notifikacija.NotifikacijaID">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 mr-3">
+                                @switch (notifikacija.Tip)
+                                {
+                                    case NotifikacijaTip.Izazov:
+                                        <div class="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                            <i data-feather="user-plus" class="text-red-500 dark:text-red-400" width="16" height="16"></i>
+                                        </div>
+                                        break;
+                                    case NotifikacijaTip.PrihvacenIzazov:
+                                        <div class="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                            <i data-feather="check" class="text-green-500 dark:text-green-400" width="16" height="16"></i>
+                                        </div>
+                                        break;
+                                    case NotifikacijaTip.OdbijenIzazov:
+                                        <div class="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                            <i data-feather="x" class="text-gray-500 dark:text-gray-400" width="16" height="16"></i>
+                                        </div>
+                                        break;
+                                    default:
+                                        <div class="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                            <i data-feather="bell" class="text-blue-500 dark:text-blue-400" width="16" height="16"></i>
+                                        </div>
+                                        break;
+                                }
+                            </div>
+                            <div class="flex-grow">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">@notifikacija.Naslov</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">@notifikacija.Sadrzaj</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                    @TimeHelper.GetTimeAgo(notifikacija.DatumKreiranja)
+                                </p>
+                            </div>
+                            @if (!notifikacija.Procitano)
+                            {
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            }
+                        </div>
+                    </a>
+                }
+            }
+            else
+            {
+                <div class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                    Nema novih notifikacija
+                </div>
+            }
+        </div>
+
+        <div class="p-2 border-t border-gray-200 dark:border-gray-700 text-center">
+            <a href="@Url.Action("Index", "Notifikacija")" class="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400">
+                Vidi sve notifikacije
+            </a>
+        </div>
+    </div>
+</div>

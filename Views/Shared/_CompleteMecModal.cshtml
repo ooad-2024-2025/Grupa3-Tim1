@@ -1,0 +1,42 @@
+﻿<div id="completeMecModal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300" onclick="closeCompleteMecModal()"></div>
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg relative z-10 transform transition-all scale-100">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Završi meč</h2>
+            <button onclick="closeCompleteMecModal()" class="text-gray-400 hover:text-red-500 focus:outline-none transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form id="completeMecForm" action="" method="post" class="space-y-5">
+            @Html.AntiForgeryToken()
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Rezultat</label>
+                <input type="text" name="rezultat" required placeholder="Npr. 3:2, Tim A pobijedio..." class="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition">
+            </div>
+
+            <div class="flex space-x-3 pt-6">
+                <button type="button" onclick="closeCompleteMecModal()" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-2 rounded-full transition-colors w-full font-semibold">
+                    Odustani
+                </button>
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full transition-colors w-full font-semibold shadow-md">
+                    Završi meč
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showCompleteMecModal(mecId) {
+        document.getElementById('completeMecForm').action = '@Url.Action("MarkAsCompleted", "Mec")/' + mecId;
+        document.getElementById('completeMecModal').classList.remove('hidden');
+    }
+
+    function closeCompleteMecModal() {
+        document.getElementById('completeMecModal').classList.add('hidden');
+    }
+</script>

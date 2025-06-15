@@ -1,0 +1,63 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Registracija";
+}
+
+<div class="bg-white rounded-xl shadow-sm p-6 max-w-md mx-auto mt-10">
+    <h2 class="text-xl font-bold text-gray-900 mb-6">@ViewData["Title"]</h2>
+
+    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="space-y-4">
+        <div asp-validation-summary="ModelOnly" class="text-red-500" role="alert"></div>
+
+        <div>
+            <label asp-for="Input.Ime" class="block text-sm font-medium text-gray-700 mb-1">Ime</label>
+            <input asp-for="Input.Ime" class="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" autocomplete="given-name" aria-required="true" />
+            <span asp-validation-for="Input.Ime" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Input.Prezime" class="block text-sm font-medium text-gray-700 mb-1">Prezime</label>
+            <input asp-for="Input.Prezime" class="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" autocomplete="family-name" aria-required="true" />
+            <span asp-validation-for="Input.Prezime" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Input.Email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input asp-for="Input.Email" class="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" autocomplete="username" aria-required="true" />
+            <span asp-validation-for="Input.Email" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Input.Lokacija" class="block text-sm font-medium text-gray-700 mb-1">Lokacija</label>
+            <input asp-for="Input.Lokacija" class="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" aria-required="true" />
+            <span asp-validation-for="Input.Lokacija" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Input.Password" class="block text-sm font-medium text-gray-700 mb-1">Lozinka</label>
+            <input asp-for="Input.Password" class="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" autocomplete="new-password" aria-required="true" />
+            <span asp-validation-for="Input.Password" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Input.ConfirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Potvrda lozinke</label>
+            <input asp-for="Input.ConfirmPassword" class="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" autocomplete="new-password" aria-required="true" />
+            <span asp-validation-for="Input.ConfirmPassword" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white w-full px-5 py-2 rounded-full transition-colors">Registriraj se</button>
+        </div>
+
+        <div class="text-center text-sm text-gray-600 mt-4">
+            <p>
+                Već imaš račun? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-red-500 hover:underline">Prijavi se</a>
+            </p>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

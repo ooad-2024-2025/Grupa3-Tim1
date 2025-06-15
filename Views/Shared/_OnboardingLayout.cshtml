@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Matchletic</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Matchletic.styles.css" asp-append-version="true" />
+</head>
+<body class="min-h-screen bg-white">
+    <header class="border-b border-gray-200 p-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="@Url.Action("Index", "Home")" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </a>
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="text-red-500 mr-2" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11.25a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5zM16.5 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM10.5 7a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM13.5 14.25a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0zM7.5 14.25a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0zM5 17.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM22 17.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                </svg>
+                <span class="font-bold text-xl text-gray-900">
+                    Match<span class="text-red-500">letic</span>
+                </span>
+            </div>
+            <div class="w-5"></div> <!-- Spacer for alignment -->
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto my-8 px-4">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,340 @@
+﻿@model List<Matchletic.Models.Mec>
+@{
+    ViewData["Title"] = "Moji mečevi";
+    var currentUserId = ViewBag.CurrentUserId;
+    var sportOptions = ViewBag.SportOptions as List<Matchletic.Models.Sport>;
+
+    // Izazovi koje je korisnik kreirao
+    var mojiKreiraniMecevi = Model.Where(m => m.KreatorID == currentUserId).ToList();
+
+    // Filtriraj mečeve koji su vidljivi trenutnom korisniku
+    // Korisnik može vidjeti:
+    // 1. Mečeve koje je kreirao
+    // 2. Mečeve u kojima je prihvatio sudjelovanje
+    // 3. Javne mečeve u kojima sudjeluje
+    var vidljiviMecevi = Model.Where(m =>
+        m.KreatorID == currentUserId || // Mečevi koje je korisnik kreirao
+        (m.Status != StatusMeca.CekaPrihvacanje) || // Svi mečevi osim onih koji čekaju prihvaćanje
+        (m.Status == StatusMeca.CekaPrihvacanje && m.KorisniciMeca.Any(km => km.KorisnikID == currentUserId && km.JePrihvacen)) // Izazovi koje je korisnik prihvatio
+    ).ToList();
+
+    // Pripremi mečeve po kategorijama za tabove
+    var objavljeniMecevi = vidljiviMecevi.Where(m => m.Status == StatusMeca.Objavljen).ToList();
+    var dogovoreniMecevi = vidljiviMecevi.Where(m => m.Status == StatusMeca.Dogovoren).ToList();
+    var zavrseniMecevi = vidljiviMecevi.Where(m => m.Status == StatusMeca.Zavrsen).ToList();
+
+    // Poseban tab za izazove (čekaju prihvaćanje)
+    var izazoviKreirani = mojiKreiraniMecevi.Where(m => m.Status == StatusMeca.CekaPrihvacanje).ToList();
+    var izazoviPrimljeni = Model.Where(m =>
+        m.Status == StatusMeca.CekaPrihvacanje &&
+        m.KreatorID != currentUserId &&
+        m.KorisniciMeca.Any(km => km.KorisnikID == currentUserId && !km.JePrihvacen)
+    ).ToList();
+}
+
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Moji mečevi</h1>
+    <button type="button" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-colors flex items-center" onclick="openCreateMecModal()">
+        <i data-feather="plus" class="mr-2" width="18" height="18"></i>
+        Kreiraj Meč
+    </button>
+</div>
+
+<div class="mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm mb-8">
+        <div class="flex items-center space-x-4">
+            <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
+                <i data-feather="calendar" class="text-blue-500 dark:text-blue-400" width="24" height="24"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Pregled svih vaših mečeva</h2>
+                <p class="text-gray-600 dark:text-gray-400">Mečevi koje ste kreirali i u kojima sudjelujete</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+    <nav class="-mb-px flex flex-wrap space-x-8">
+        <button type="button" class="py-4 px-1 border-b-2 border-red-500 text-red-600 font-medium text-sm" id="tab-svi" onclick="switchTab('svi')">
+            Svi moji mečevi
+        </button>
+        <button type="button" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm dark:text-gray-400 dark:hover:text-gray-300" id="tab-kreirani" onclick="switchTab('kreirani')">
+            Moji kreirani mečevi
+        </button>
+        <button type="button" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm dark:text-gray-400 dark:hover:text-gray-300" id="tab-izazovi" onclick="switchTab('izazovi')">
+            Izazovi
+            @if (izazoviPrimljeni.Any())
+            {
+                <span class="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">@izazoviPrimljeni.Count</span>
+            }
+        </button>
+        <button type="button" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm dark:text-gray-400 dark:hover:text-gray-300" id="tab-objavljeni" onclick="switchTab('objavljeni')">
+            Objavljeni
+        </button>
+        <button type="button" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm dark:text-gray-400 dark:hover:text-gray-300" id="tab-dogovoreni" onclick="switchTab('dogovoreni')">
+            Dogovoreni
+        </button>
+        <button type="button" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm dark:text-gray-400 dark:hover:text-gray-300" id="tab-zavrseni" onclick="switchTab('zavrseni')">
+            Završeni
+        </button>
+    </nav>
+</div>
+
+<div id="svi-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @if (vidljiviMecevi.Any())
+    {
+        foreach (var mec in vidljiviMecevi)
+        {
+            <partial name="_MatchCard" model="mec" />
+        }
+    }
+    else
+    {
+        <div class="col-span-3 py-12 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema mečeva</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                Trenutno nemate mečeva. Pridružite se nekom meču ili kreirajte novi.
+            </p>
+            <button type="button" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-colors inline-flex items-center" onclick="openCreateMecModal()">
+                <i data-feather="plus" class="mr-2" width="18" height="18"></i>
+                Kreiraj meč
+            </button>
+        </div>
+    }
+</div>
+
+<div id="kreirani-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+    @if (mojiKreiraniMecevi.Any())
+    {
+        foreach (var mec in mojiKreiraniMecevi)
+        {
+            <partial name="_MatchCard" model="mec" />
+        }
+    }
+    else
+    {
+        <div class="col-span-3 py-12 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema kreiranih mečeva</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                Još niste kreirali nijedan meč. Kreirajte svoj prvi meč.
+            </p>
+            <button type="button" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-colors inline-flex items-center" onclick="openCreateMecModal()">
+                <i data-feather="plus" class="mr-2" width="18" height="18"></i>
+                Kreiraj meč
+            </button>
+        </div>
+    }
+</div>
+
+<!-- Tab s izazovima -->
+<div id="izazovi-container" class="hidden">
+    <!-- Izazovi koje sam primio -->
+    @if (izazoviPrimljeni.Any())
+    {
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Primljeni izazovi</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var mec in izazoviPrimljeni)
+                {
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border-2 border-yellow-400 dark:border-yellow-600">
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900 dark:text-white text-lg">@mec.Naslov</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        <i data-feather="user" class="inline-block mr-1" width="14" height="14"></i>
+                                        Izazivač: @mec.Kreator.Ime @mec.Kreator.Prezime
+                                    </p>
+                                </div>
+                                <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 text-xs px-2 py-1 rounded-full font-medium">
+                                    Čeka odgovor
+                                </span>
+                            </div>
+
+                            <p class="text-gray-700 dark:text-gray-300 text-sm mb-4">@mec.Opis</p>
+
+                            <div class="grid grid-cols-2 gap-3 text-sm mb-4">
+                                <div>
+                                    <span class="block text-gray-500 dark:text-gray-400">Sport</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">@mec.Sport.Naziv</span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500 dark:text-gray-400">Lokacija</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">@mec.Lokacija</span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500 dark:text-gray-400">Datum</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">@mec.DatumMeca.ToString("dd.MM.yyyy")</span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500 dark:text-gray-400">Vrijeme</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">@mec.DatumMeca.ToString("HH:mm")</span>
+                                </div>
+                            </div>
+
+                            <div class="flex space-x-2">
+                                <form asp-action="AcceptChallenge" asp-controller="Mec" method="post" class="flex-1">
+                                    <input type="hidden" name="id" value="@mec.MecID" />
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+                                        Prihvati
+                                    </button>
+                                </form>
+                                <form asp-action="RejectChallenge" asp-controller="Mec" method="post" class="flex-1">
+                                    <input type="hidden" name="id" value="@mec.MecID" />
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
+                                        Odbij
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Izazovi koje sam poslao -->
+    @if (izazoviKreirani.Any())
+    {
+        <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Poslani izazovi</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var mec in izazoviKreirani)
+                {
+                    <partial name="_MatchCard" model="mec" />
+                }
+            </div>
+        </div>
+    }
+
+    @if (!izazoviPrimljeni.Any() && !izazoviKreirani.Any())
+    {
+        <div class="col-span-3 py-12 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema izazova</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                Trenutno nemate poslanih niti primljenih izazova.
+            </p>
+        </div>
+    }
+</div>
+
+<div id="objavljeni-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+    @if (objavljeniMecevi.Any())
+    {
+        foreach (var mec in objavljeniMecevi)
+        {
+            <partial name="_MatchCard" model="mec" />
+        }
+    }
+    else
+    {
+        <div class="col-span-3 py-12 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema objavljenih mečeva</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Trenutno nemate objavljenih mečeva.</p>
+        </div>
+    }
+</div>
+
+<div id="dogovoreni-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+    @if (dogovoreniMecevi.Any())
+    {
+        foreach (var mec in dogovoreniMecevi)
+        {
+            <partial name="_MatchCard" model="mec" />
+        }
+    }
+    else
+    {
+        <div class="col-span-3 py-12 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema dogovorenih mečeva</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Trenutno nemate dogovorenih mečeva.</p>
+        </div>
+    }
+</div>
+
+<div id="zavrseni-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+    @if (zavrseniMecevi.Any())
+    {
+        foreach (var mec in zavrseniMecevi)
+        {
+            <partial name="_MatchCard" model="mec" />
+        }
+    }
+    else
+    {
+        <div class="col-span-3 py-12 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema završenih mečeva</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Trenutno nemate završenih mečeva.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function openCreateMecModal() {
+            document.getElementById('createMecModal').classList.remove('hidden');
+            feather.replace(); // Re-initialize icons in the modal
+        }
+
+        function closeCreateMecModal() {
+            document.getElementById('createMecModal').classList.add('hidden');
+        }
+
+        function switchTab(tab) {
+            // Reset all tabs to inactive
+            document.getElementById('tab-svi').classList.remove('border-red-500', 'text-red-600');
+            document.getElementById('tab-svi').classList.add('border-transparent', 'text-gray-500');
+            document.getElementById('tab-kreirani').classList.remove('border-red-500', 'text-red-600');
+            document.getElementById('tab-kreirani').classList.add('border-transparent', 'text-gray-500');
+            document.getElementById('tab-izazovi').classList.remove('border-red-500', 'text-red-600');
+            document.getElementById('tab-izazovi').classList.add('border-transparent', 'text-gray-500');
+            document.getElementById('tab-objavljeni').classList.remove('border-red-500', 'text-red-600');
+            document.getElementById('tab-objavljeni').classList.add('border-transparent', 'text-gray-500');
+            document.getElementById('tab-dogovoreni').classList.remove('border-red-500', 'text-red-600');
+            document.getElementById('tab-dogovoreni').classList.add('border-transparent', 'text-gray-500');
+            document.getElementById('tab-zavrseni').classList.remove('border-red-500', 'text-red-600');
+            document.getElementById('tab-zavrseni').classList.add('border-transparent', 'text-gray-500');
+
+            // Set active tab
+            document.getElementById('tab-' + tab).classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById('tab-' + tab).classList.add('border-red-500', 'text-red-600');
+
+            // Hide all containers
+            document.getElementById('svi-container').classList.add('hidden');
+            document.getElementById('kreirani-container').classList.add('hidden');
+            document.getElementById('izazovi-container').classList.add('hidden');
+            document.getElementById('objavljeni-container').classList.add('hidden');
+            document.getElementById('dogovoreni-container').classList.add('hidden');
+            document.getElementById('zavrseni-container').classList.add('hidden');
+
+            // Show the selected container
+            document.getElementById(tab + '-container').classList.remove('hidden');
+        }
+
+        // Initialize feather icons when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
+}

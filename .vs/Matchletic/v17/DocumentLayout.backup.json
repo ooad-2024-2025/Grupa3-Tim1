@@ -1,0 +1,241 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\controllers\\postignucacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:controllers\\postignucacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\views\\postignuca\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:views\\postignuca\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\models\\postignuce.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:models\\postignuce.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\services\\postignuceservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:services\\postignuceservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\views\\shared\\_sidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:views\\shared\\_sidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Migrations\\20250615222200_AddAchievementSystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Migrations\\20250615222200_AddAchievementSystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\models\\notifikacijatip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:models\\notifikacijatip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\models\\korisnik.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:models\\korisnik.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\views\\mec\\feed.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:views\\mec\\feed.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\controllers\\meccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:controllers\\meccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|d:\\ismail\\etf\\drugagodina\\cetvrtisemestar\\objektnoorijetisanaanalizaidizajn\\matchletic\\views\\shared\\_matchcard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{479EEE6B-E340-4310-B91A-267F118C4CF3}|Matchletic.csproj|solutionrelative:views\\shared\\_matchcard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "20250615222200_AddAchievementSystem.cs",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Migrations\\20250615222200_AddAchievementSystem.cs",
+              "RelativeDocumentMoniker": "Migrations\\20250615222200_AddAchievementSystem.cs",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Migrations\\20250615222200_AddAchievementSystem.cs",
+              "RelativeToolTip": "Migrations\\20250615222200_AddAchievementSystem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAABFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T22:22:00.523Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "NotifikacijaTip.cs",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Models\\NotifikacijaTip.cs",
+              "RelativeDocumentMoniker": "Models\\NotifikacijaTip.cs",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Models\\NotifikacijaTip.cs",
+              "RelativeToolTip": "Models\\NotifikacijaTip.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T22:14:53.525Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Korisnik.cs",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Models\\Korisnik.cs",
+              "RelativeDocumentMoniker": "Models\\Korisnik.cs",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Models\\Korisnik.cs",
+              "RelativeToolTip": "Models\\Korisnik.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAQwD4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T22:13:37.006Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAADUAAAAAAAAAAAAAAFAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T22:07:51.69Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PostignuceService.cs",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Services\\PostignuceService.cs",
+              "RelativeDocumentMoniker": "Services\\PostignuceService.cs",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Services\\PostignuceService.cs",
+              "RelativeToolTip": "Services\\PostignuceService.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAA5wC4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T22:04:57.235Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Data\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\ApplicationDbContext.cs",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Data\\ApplicationDbContext.cs",
+              "RelativeToolTip": "Data\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAIAAAAAAAAAAAAAowJMAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T22:03:47.347Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "_Sidebar.cshtml",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Views\\Shared\\_Sidebar.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_Sidebar.cshtml",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Views\\Shared\\_Sidebar.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_Sidebar.cshtml",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAAAFgAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-15T21:56:06.831Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PostignucaController.cs",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Controllers\\PostignucaController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PostignucaController.cs",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Controllers\\PostignucaController.cs",
+              "RelativeToolTip": "Controllers\\PostignucaController.cs",
+              "ViewState": "AgIAAPUAAAAAAAAAAAAowBIBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T21:55:27.871Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Postignuce.cs",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Models\\Postignuce.cs",
+              "RelativeDocumentMoniker": "Models\\Postignuce.cs",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Models\\Postignuce.cs",
+              "RelativeToolTip": "Models\\Postignuce.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAAA1wCYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T21:54:15.812Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Views\\Postignuca\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Postignuca\\Index.cshtml",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Views\\Postignuca\\Index.cshtml",
+              "RelativeToolTip": "Views\\Postignuca\\Index.cshtml",
+              "ViewState": "AgIAACoAAAAAAAAAAAAowDwAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-15T21:53:52.552Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Feed.cshtml",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Views\\Mec\\Feed.cshtml",
+              "RelativeDocumentMoniker": "Views\\Mec\\Feed.cshtml",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Views\\Mec\\Feed.cshtml",
+              "RelativeToolTip": "Views\\Mec\\Feed.cshtml",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAAADgAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-15T21:41:53.767Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "MecController.cs",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Controllers\\MecController.cs",
+              "RelativeDocumentMoniker": "Controllers\\MecController.cs",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Controllers\\MecController.cs",
+              "RelativeToolTip": "Controllers\\MecController.cs",
+              "ViewState": "AgIAAHsCAAAAAAAAAADwv50CAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T21:41:33.319Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "_MatchCard.cshtml",
+              "DocumentMoniker": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Views\\Shared\\_MatchCard.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_MatchCard.cshtml",
+              "ToolTip": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\Views\\Shared\\_MatchCard.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_MatchCard.cshtml",
+              "ViewState": "AgIAAFoAAAAAAAAAAIAwwHgAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-15T21:40:17.718Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

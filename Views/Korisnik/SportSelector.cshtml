@@ -1,0 +1,106 @@
+﻿@model List<Matchletic.Models.Sport>
+@{
+    ViewData["Title"] = "Odaberite sportove";
+    Layout = "_OnboardingLayout"; // Trebate kreirati ovaj layout
+}
+
+<div class="max-w-3xl mx-auto p-8">
+    <h1 class="text-2xl font-bold text-center mb-2">Odaberite vaše omiljene sportove</h1>
+    <p class="text-gray-600 text-center mb-8">
+        Ovo nam pomaže prilagoditi vaše iskustvo i povezati vas s odgovarajućim igračima.
+    </p>
+
+    <form method="post" action="@Url.Action("SaveSports", "Onboarding")">
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 mb-8">
+            @foreach (var sport in Model)
+            {
+                <label class="flex flex-col items-center justify-center p-4 rounded-xl transition-all cursor-pointer
+                            bg-white border border-gray-200 hover:border-red-200 hover:bg-red-50">
+                    <input type="checkbox" name="SelectedSports" value="@sport.SportID" class="hidden sport-checkbox"
+                           data-sport-id="@sport.SportID" />
+                    <div class="w-12 h-12 flex items-center justify-center mb-2">
+                        @if (!string.IsNullOrEmpty(sport.Ikona))
+                        {
+                            <img src="@sport.Ikona" alt="@sport.Naziv" class="w-8 h-8" />
+                        }
+                        else
+                        {
+                            <span class="text-2xl">@GetSportEmoji(sport.Naziv)</span>
+                        }
+                    </div>
+                    <span class="text-sm font-medium">@sport.Naziv</span>
+                </label>
+            }
+        </div>
+
+        <div class="flex justify-between">
+            <a href="@Url.Action("Skip", "Onboarding")" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-2 rounded-full transition-colors">
+                Preskoči
+            </a>
+            <button type="submit" id="continueBtn" class="bg-gray-300 text-white px-5 py-2 rounded-full transition-colors cursor-not-allowed" disabled>
+                Nastavi
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('.sport-checkbox');
+            const continueBtn = document.getElementById('continueBtn');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Toggle selected state
+                    const label = this.closest('label');
+                    if (this.checked) {
+                        label.classList.remove('bg-white', 'border-gray-200');
+                        label.classList.add('bg-red-100', 'border-red-500', 'text-red-700');
+                    } else {
+                        label.classList.remove('bg-red-100', 'border-red-500', 'text-red-700');
+                        label.classList.add('bg-white', 'border-gray-200');
+                    }
+
+                    // Check if any sport is selected to enable the continue button
+                    const selectedSports = document.querySelectorAll('.sport-checkbox:checked');
+                    if (selectedSports.length > 0) {
+                        continueBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+                        continueBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+                        continueBtn.disabled = false;
+                        continueBtn.textContent = `Nastavi (${selectedSports.length})`;
+                    } else {
+                        continueBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                        continueBtn.classList.add('bg-gray-300', 'cursor-not-allowed');
+                        continueBtn.disabled = true;
+                        continueBtn.textContent = 'Nastavi';
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+@functions {
+    public string GetSportEmoji(string sportName)
+    {
+        var sportIcons = new Dictionary<string, string>
+        {
+            { "Nogomet", "⚽" },
+            { "Košarka", "🏀" },
+            { "Tenis", "🎾" },
+            { "Golf", "⛳" },
+            { "Plivanje", "🏊" },
+            { "Odbojka", "🏐" },
+            { "Bejzbol", "⚾" },
+            { "Ragbi", "🏉" },
+            { "Kriket", "🏏" },
+            { "Boks", "🥊" },
+            { "Hokej", "🏒" },
+            { "Atletika", "🏃" },
+            { "Biciklizam", "🚴" }
+        };
+
+        return sportIcons.GetValueOrDefault(sportName, "🏅");
+    }
+}

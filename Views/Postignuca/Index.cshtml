@@ -1,0 +1,71 @@
+﻿@model List<Matchletic.Models.KorisnikPostignuce>
+@{
+    ViewData["Title"] = "Dostignuća";
+}
+
+<div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dostignuća</h1>
+    <p class="text-gray-600 dark:text-gray-400 mt-2">Pratite svoj napredak i otključajte posebna dostignuća</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var korisnikPostignuce in Model)
+        {
+            var dostignuce = korisnikPostignuce.Postignuce;
+            var jeOtkljucano = korisnikPostignuce.NapredakProcenti == 100;
+            
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden p-6 transition-all hover:shadow-md">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="mr-4 @(dostignuce.IkonaTip == "trophy" ? "bg-yellow-100 dark:bg-yellow-900/30" : dostignuce.BojaKlasa) p-3 rounded-full">
+                            <i data-feather="@(dostignuce.IkonaTip ?? "trophy")" class="@(dostignuce.IkonaTip == "trophy" ? "text-yellow-600 dark:text-yellow-500" : "")" width="24" height="24"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-100">@dostignuce.Naziv</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">@dostignuce.Opis</p>
+                        </div>
+                    </div>
+                    @if (jeOtkljucano)
+                    {
+                        <div class="bg-yellow-100 dark:bg-yellow-900/30 rounded-full p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 dark:text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    }
+                </div>
+                <div class="mt-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Napredak</p>
+                        <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">@korisnikPostignuce.NapredakProcenti%</p>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                        <div class="bg-red-500 dark:bg-red-600 h-2.5 rounded-full transition-all duration-500" style="width: @(korisnikPostignuce.NapredakProcenti)%"></div>
+                    </div>
+                </div>
+                @if (jeOtkljucano && korisnikPostignuce.DatumOtkljucavanja.HasValue)
+                {
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Otključano @korisnikPostignuce.DatumOtkljucavanja.Value.ToString("dd.MM.yyyy")</p>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-span-2 py-12 text-center bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <i data-feather="award" class="mx-auto text-gray-400 dark:text-gray-500 mb-4" width="48" height="48"></i>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">Nema dostignuća</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Igrajte mečeve i ispunjavajte ciljeve da biste otključali dostignuća.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
+}

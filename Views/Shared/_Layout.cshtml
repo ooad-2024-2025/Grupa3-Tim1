@@ -1,0 +1,174 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.DependencyInjection
+@using Matchletic.Data
+@using Matchletic.Models
+
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Matchletic</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/light-mode.css" />
+    <link rel="stylesheet" href="~/css/dark-mode.css" />
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <!-- Dodajte inline skriptu za rano postavljanje teme prije renderiranja stranice -->
+    <script>
+        // Postavlja temu prije renderiranja stranice
+        (function() {
+            // Dohvati pohranjenu temu
+            const savedTheme = localStorage.getItem('theme') || 'light';
+
+            // Očisti postojeće klase
+            document.documentElement.className = '';
+
+            // Postavi klasu teme
+            document.documentElement.classList.add(savedTheme);
+
+            // Također postavi data-theme atribut
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
+            // Zapamti trenutnu temu
+            window.currentTheme = savedTheme;
+        })();
+    </script>
+
+    <style>
+        /* Prisilno aktivirati dark mode varijante kada je html.dark aktivan */
+        @@media (prefers-color-scheme: dark) {
+            html.dark .dark\:bg-gray-800 {
+                background-color: #1c1c1c !important; /* Tamnije siva umjesto #1f2937 */
+            }
+
+            html.dark .dark\:bg-gray-900 {
+                background-color: #121212 !important; /* Tamnije siva umjesto #111827 */
+            }
+
+            html.dark .dark\:text-white {
+                color: #ffffff !important;
+            }
+
+            html.dark .dark\:text-gray-300 {
+                color: #d4d4d4 !important; /* Malo neutralnija siva umjesto #d1d5db */
+            }
+
+            html.dark .dark\:text-gray-400 {
+                color: #a0a0a0 !important; /* Neutralnija siva umjesto #9ca3af */
+            }
+
+            html.dark .dark\:border-gray-700 {
+                border-color: #2c2c2c !important; /* Neutralnija siva umjesto #374151 */
+            }
+
+            html.dark .dark\:hover\:bg-gray-700:hover {
+                background-color: #2a2a2a !important; /* Neutralnija siva umjesto #374151 */
+            }
+
+            html.dark .dark\:bg-red-900\/20 {
+                background-color: rgba(127, 29, 29, 0.2) !important;
+            }
+
+            html.dark .dark\:text-red-400 {
+                color: #f87171 !important;
+            }
+
+            html.dark .dark\:hover\:text-red-400:hover {
+                color: #f87171 !important;
+            }
+        }
+    </style>
+
+
+</head>
+
+@{
+    // Dohvati sportove za modalni prozor ako je korisnik prijavljen
+    List<Sport> sportovi = null;
+    if (User.Identity.IsAuthenticated)
+    {
+        var db = Context.RequestServices.GetRequiredService<ApplicationDbContext>();
+        sportovi = await db.Sportovi.ToListAsync();
+    }
+}
+
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    @await Html.PartialAsync("_Header")
+
+    <div class="flex">
+        @if (User.Identity.IsAuthenticated)
+        {
+            @await Html.PartialAsync("_Sidebar")
+            <partial name="_CreateMecModal" model="sportovi" />
+        }
+
+        <main class="@(User.Identity.IsAuthenticated ? "flex-1 ml-64" : "w-full") p-8 pt-8">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Funkcija za primjenu teme
+                function applyTheme(theme) {
+            const html = document.documentElement;
+            const moonIcon = document.getElementById('moon-icon');
+            const sunIcon = document.getElementById('sun-icon');
+
+            // Ukloni postojeće klase teme
+            html.classList.remove('light', 'dark');
+
+            // Postavi novu klasu teme
+            html.classList.add(theme);
+
+            // Postavi data-theme atribut za CSS varijable
+            html.setAttribute('data-theme', theme);
+
+            // Ažuriraj ikone
+            if (theme === 'dark') {
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'block';
+            } else {
+                moonIcon.style.display = 'block';
+                sunIcon.style.display = 'none';
+            }
+
+            // Spremi preferenciju
+            localStorage.setItem('theme', theme);
+
+            console.log('Primijenjena tema:', theme);
+        }
+
+        // Funkcija za prebacivanje teme
+        function toggleTheme() {
+            const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            console.log('Prebacivanje teme s', currentTheme, 'na', newTheme);
+
+            // Primijeni novu temu
+            applyTheme(newTheme);
+        }
+
+        // Inicijalizacija
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dohvati pohranjenu temu ili koristi light kao default
+            const savedTheme = localStorage.getItem('theme') || 'light';
+
+            // Primijeni temu
+            applyTheme(savedTheme);
+
+            // Inicijaliziraj ikone
+            feather.replace();
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

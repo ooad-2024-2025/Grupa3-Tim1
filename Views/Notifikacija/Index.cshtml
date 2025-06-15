@@ -1,0 +1,94 @@
+﻿@model IEnumerable<Matchletic.Models.Notifikacija>
+@using Matchletic.Helpers
+@{
+    ViewData["Title"] = "Notifikacije";
+}
+
+<div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Notifikacije</h1>
+
+            @if (Model.Any(n => !n.Procitano))
+            {
+                <form asp-action="OznaciSveKaoProcitano" method="post">
+                    <button type="submit" class="text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-lg">
+                        Označi sve kao pročitano
+                    </button>
+                </form>
+            }
+        </div>
+
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            @if (Model.Any())
+            {
+                foreach (var notifikacija in Model)
+                {
+                    <div class="flex px-6 py-4 @(!notifikacija.Procitano ? "bg-blue-50 dark:bg-blue-900/10" : "")">
+                        <div class="flex-shrink-0 mr-4">
+                            @switch (notifikacija.Tip)
+                            {
+                                case NotifikacijaTip.Izazov:
+                                    <div class="h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                        <i data-feather="user-plus" class="text-red-500 dark:text-red-400" width="20" height="20"></i>
+                                    </div>
+                                    break;
+                                case NotifikacijaTip.PrihvacenIzazov:
+                                    <div class="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                        <i data-feather="check" class="text-green-500 dark:text-green-400" width="20" height="20"></i>
+                                    </div>
+                                    break;
+                                case NotifikacijaTip.OdbijenIzazov:
+                                    <div class="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                        <i data-feather="x" class="text-gray-500 dark:text-gray-400" width="20" height="20"></i>
+                                    </div>
+                                    break;
+                                default:
+                                    <div class="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                        <i data-feather="bell" class="text-blue-500 dark:text-blue-400" width="20" height="20"></i>
+                                    </div>
+                                    break;
+                            }
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between">
+                                <h3 class="font-semibold text-gray-900 dark:text-white">@notifikacija.Naslov</h3>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">@TimeHelper.GetTimeAgo(notifikacija.DatumKreiranja)</span>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300 mt-1">@notifikacija.Sadrzaj</p>
+                            <div class="mt-2 flex justify-between items-center">
+                                <a href="@notifikacija.Url" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 text-sm">Pregledaj</a>
+                                @if (!notifikacija.Procitano)
+                                {
+                                    <form asp-action="OznaciKaoProcitano" asp-route-id="@notifikacija.NotifikacijaID" method="post">
+                                        <button type="submit" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                            Označi kao pročitano
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="px-6 py-12 text-center">
+                    <div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                        <i data-feather="bell-off" class="text-gray-400" width="24" height="24"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema notifikacija</h3>
+                    <p class="text-gray-500 dark:text-gray-400">Trenutno nemaš novih notifikacija.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
+}

@@ -1,0 +1,506 @@
+﻿/* wwwroot/css/dark-mode.css */
+
+/* Dark Mode Variables */
+:root {
+    --color-bg-primary: #f9fafb;
+    --color-bg-secondary: #ffffff;
+    --color-text-primary: #111827;
+    --color-text-secondary: #4b5563;
+    --color-border: #e5e7eb;
+}
+
+html.dark, [data-theme="dark"] {
+    --color-bg-primary: #121212; /* Tamnije siva umjesto #111827 */
+    --color-bg-secondary: #1c1c1c; /* Tamnije siva umjesto #1f2937 */
+    --color-text-primary: #f9fafb;
+    --color-text-secondary: #d4d4d4; /* Neutralnija siva umjesto #d1d5db */
+    --color-border: #2c2c2c; /* Neutralnija siva umjesto #374151 */
+}
+
+/* Osnovni dark mode */
+html.dark {
+    color-scheme: dark;
+}
+
+    html.dark body {
+        background-color: #121212; /* Promijenjena iz #111827 */
+        color: #f9fafb; /* gray-50 */
+    }
+
+    html.dark .bg-white {
+        background-color: #1c1c1c !important; /* Promijenjena iz #1f2937 */
+    }
+
+    html.dark .text-gray-900 {
+        color: #f9fafb !important; /* gray-50 */
+    }
+
+    html.dark .text-gray-700,
+    html.dark .text-gray-600,
+    html.dark .text-gray-500 {
+        color: #d4d4d4 !important; /* Promijenjena iz #d1d5db */
+    }
+
+    html.dark .border-gray-200 {
+        border-color: #2c2c2c !important; /* Promijenjena iz #374151 */
+    }
+
+/* Base styles za non-Tailwind elemente */
+body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Card styles */
+.bg-white.themed {
+    background-color: var(--color-bg-secondary);
+}
+
+.text-gray-900.themed {
+    color: var(--color-text-primary);
+}
+
+.text-gray-500.themed, .text-gray-600.themed, .text-gray-700.themed {
+    color: var(--color-text-secondary);
+}
+
+.border-gray-200.themed {
+    border-color: var(--color-border);
+}
+
+/* Toggle button */
+.theme-toggle {
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+html.dark .theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Dodatne klase za Tailwind specifične stilove u dark modu */
+html.dark .dark\:bg-gray-800 {
+    background-color: #1c1c1c !important;
+}
+
+html.dark .dark\:bg-gray-900 {
+    background-color: #121212 !important;
+}
+
+html.dark .dark\:text-white {
+    color: #ffffff !important;
+}
+
+html.dark .dark\:text-gray-300 {
+    color: #d4d4d4 !important;
+}
+
+html.dark .dark\:text-gray-400 {
+    color: #a0a0a0 !important;
+}
+
+html.dark .dark\:border-gray-700 {
+    border-color: #2c2c2c !important;
+}
+
+html.dark .dark\:hover\:bg-gray-700:hover {
+    background-color: #2a2a2a !important;
+}
+
+/* Stilovi za crvenu pozadinu u dark modu */
+html.dark .dark\:bg-red-900\/20 {
+    background-color: rgba(80, 20, 20, 0.4) !important; /* Tamnija i manje prozirna crvena */
+}
+
+/* Također možete dodati ove stilove za aktivne elemente s crvenim tekstom */
+html.dark .dark\:text-red-400 {
+    color: #ff6b6b !important; /* Malo svjetlija crvena za bolju vidljivost */
+}
+
+/* Za aktivne stavke u navigaciji i sl. */
+html.dark .dark\:bg-red-900\/20.active,
+html.dark .active .dark\:bg-red-900\/20 {
+    background-color: rgba(90, 25, 25, 0.5) !important; /* Još tamnija za aktivne elemente */
+}
+
+/* Za hover stanja */
+html.dark .dark\:hover\:bg-red-900\/30:hover {
+    background-color: rgba(100, 30, 30, 0.3) !important;
+}
+
+/* Stilovi za objavljene meče na Feed stranici koji se ne mijenjaju između tema */
+html.dark .bg-blue-100 {
+    background-color: rgba(30, 58, 138, 0.3) !important; /* Tamnoplava s boljim kontrastom */
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1) !important;
+}
+
+html.dark .text-blue-500 {
+    color: #5e9eff !important; /* Svjetlija plava za dark mode */
+}
+
+/* Green statusi u dark modu */
+html.dark div[style*="background-color: #E8F5E9; color: #2E7D32"] {
+    background-color: #0d2816 !important;
+    color: #6fcf97 !important;
+}
+
+/* Orange/Yellow statusi u dark modu */
+html.dark div[style*="background-color: #FFF8E1; color: #F57C00"] {
+    background-color: #2d2207 !important;
+    color: #f9a825 !important;
+}
+
+/* Blue statusi u dark modu */
+html.dark div[style*="background-color: #E3F2FD; color: #1565C0"] {
+    background-color: #0d2744 !important;
+    color: #5e9eff !important;
+}
+
+/* Posebni popravci za sportove sekciju na profilu */
+html.dark .bg-gray-50 {
+    background-color: #262626 !important;
+}
+
+html.dark .bg-red-100 {
+    background-color: #3d1515 !important;
+}
+
+html.dark .bg-yellow-100 {
+    background-color: #3d3012 !important;
+}
+
+html.dark .text-yellow-500 {
+    color: #ffb300 !important;
+}
+
+html.dark .bg-gray-100 {
+    background-color: #2a2a2a !important;
+}
+
+/* Match card stilovi */
+html.dark .rounded-xl.shadow-sm.border.border-gray-200 {
+    background-color: #1c1c1c !important;
+    border-color: #2c2c2c !important;
+}
+
+/* Match feed header pozadina */
+html.dark .bg-white.rounded-xl.p-6.shadow-sm {
+    background-color: #1c1c1c !important;
+}
+
+/* Profil sports sekcija pozadina */
+html.dark #sports .bg-white {
+    background-color: #1c1c1c !important;
+}
+
+html.dark #history .bg-white {
+    background-color: #1c1c1c !important;
+}
+
+html.dark #statistics .bg-white {
+    background-color: #1c1c1c !important;
+}
+
+/* Tamniji stroke za circle progress bar */
+html.dark .dark\:stroke-gray-700 {
+    stroke: #333333 !important;
+}
+
+/* Sports sekcija pozadina */
+html.dark .flex.items-center.bg-gray-50 {
+    background-color: #262626 !important;
+}
+
+/* Popravak za tabelu */
+html.dark .divide-gray-200 {
+    border-color: #2c2c2c !important;
+}
+
+/* Empty states */
+html.dark .bg-gray-50.dark\:bg-gray-700 {
+    background-color: #262626 !important;
+}
+
+/* Za bolje vidljive svg ikone */
+html.dark svg.text-gray-400,
+html.dark svg.text-gray-500,
+html.dark svg.text-gray-600 {
+    color: #9ca3af !important;
+}
+
+/* Za match karticu */
+html.dark .bg-gray-50.-mx-5.px-5.py-3.mb-4 {
+    background-color: #262626 !important;
+}
+
+/* Za sve match kartice */
+html.dark .bg-white.rounded-xl.shadow-sm.border.border-gray-200 {
+    background-color: #1c1c1c !important;
+    border-color: #2c2c2c !important;
+}
+
+/* Konsolidirani stil za "Svi objavljeni mečevi" sekciju */
+html.dark .mb-6 .bg-white.rounded-xl.p-6.shadow-sm.mb-8 {
+    background: linear-gradient(to bottom right, #101010, #181818) !important; /* Još tamnija pozadina */
+    border: 1px solid #2c2c2c !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.2s ease !important;
+}
+
+    html.dark .mb-6 .bg-white.rounded-xl.p-6.shadow-sm.mb-8:hover {
+        background: linear-gradient(to bottom right, #151515, #1e1e1e) !important;
+        transform: translateY(-1px);
+    }
+
+    /* Specifični stilovi za tekst i ikone unutar te sekcije */
+    html.dark .mb-6 .bg-white.rounded-xl.p-6.shadow-sm.mb-8 h2.text-lg.font-semibold {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.01em !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    html.dark .mb-6 .bg-white.rounded-xl.p-6.shadow-sm.mb-8 p.text-gray-600 {
+        color: #b0b0b0 !important;
+    }
+
+    html.dark .mb-6 .bg-white.rounded-xl.p-6.shadow-sm.mb-8 .text-blue-500 {
+        color: #5e9eff !important;
+    }
+    html.dark .mb-6 .bg-white.rounded-xl.p-6.shadow-sm.mb-8 .bg-blue-100 {
+        background-color: rgba(30, 58, 138, 0.4) !important; /* Malo intenzivnija plava pozadina */
+        border: 1px solid rgba(59, 130, 246, 0.3) !important; /* Izraženiji obrub */
+    }
+
+/* Poboljšaj kontrast između pozadine i elemenata */
+html.dark .flex.items-center.space-x-4 {
+    position: relative;
+    z-index: 1;
+}
+
+/* Fix za input polja u dark modu */
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="number"],
+html.dark input[type="date"],
+html.dark input[type="time"],
+html.dark textarea,
+html.dark select {
+    background-color: #262626 !important;
+    border-color: #333333 !important;
+    color: #f9fafb !important;
+}
+
+    html.dark input[type="text"]:focus,
+    html.dark input[type="email"]:focus,
+    html.dark input[type="password"]:focus,
+    html.dark input[type="number"]:focus,
+    html.dark input[type="date"]:focus,
+    html.dark input[type="time"]:focus,
+    html.dark textarea:focus,
+    html.dark select:focus {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2) !important;
+    }
+
+/* Stilovi za gumbe u dark modu */
+html.dark .bg-red-500 {
+    background-color: #ef4444 !important;
+}
+
+html.dark .hover\:bg-red-600:hover {
+    background-color: #dc2626 !important;
+}
+
+/* Ostali sitni popravci */
+html.dark .shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+html.dark ::placeholder {
+    color: #6b7280 !important;
+    opacity: 0.6;
+}
+
+/* Za modalne prozore */
+html.dark .modal-content {
+    background-color: #1c1c1c !important;
+    border-color: #2c2c2c !important;
+}
+
+/* Dodajte na kraj vašeg dark-mode.css */
+
+/* Stilovi za kartice "Objavljeni", "Dogovoreni", "Završeni" u "Moji mečevi" */
+html.dark .bg-blue-50 {
+    background-color: #172042 !important; /* Tamna plava pozadina */
+}
+
+html.dark .bg-yellow-50 {
+    background-color: #312711 !important; /* Tamna žuta/smeđa pozadina */
+}
+
+html.dark .bg-green-50 {
+    background-color: #132a1c !important; /* Tamna zelena pozadina */
+}
+
+html.dark .text-blue-800 {
+    color: #93c5fd !important; /* Svjetlija plava za naslove */
+}
+
+html.dark .text-yellow-800 {
+    color: #fcd34d !important; /* Svjetlija žuta za naslove */
+}
+
+html.dark .text-green-800 {
+    color: #86efac !important; /* Svjetlija zelena za naslove */
+}
+
+html.dark .text-blue-700 {
+    color: #60a5fa !important; /* Svjetlija plava za brojeve */
+}
+
+html.dark .text-yellow-700 {
+    color: #fbbf24 !important; /* Svjetlija žuta za brojeve */
+}
+
+html.dark .text-green-700 {
+    color: #4ade80 !important; /* Svjetlija zelena za brojeve */
+}
+
+/* Poboljšanja za kontejner s karticama */
+html.dark .bg-white.rounded-xl.p-6.shadow-sm.mb-8 .grid {
+    --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--tw-shadow);
+}
+
+/* Poboljšanja za kartice - dodaje se suptilni obrub za bolji kontrast */
+html.dark .bg-blue-50,
+html.dark .bg-yellow-50,
+html.dark .bg-green-50 {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    html.dark .bg-blue-50:hover,
+    html.dark .bg-yellow-50:hover,
+    html.dark .bg-green-50:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+    }
+
+/* Tabs poboljšanja za dark mode */
+html.dark .border-b.border-gray-200 {
+    border-color: #2c2c2c !important;
+}
+
+html.dark .border-red-500 {
+    border-color: #ef4444 !important;
+}
+
+html.dark .text-red-600 {
+    color: #f87171 !important;
+}
+
+html.dark .text-gray-500.hover\:text-gray-700 {
+    color: #9ca3af !important;
+}
+
+    html.dark .text-gray-500.hover\:text-gray-700:hover {
+        color: #e5e7eb !important;
+    }
+
+html.dark .hover\:border-gray-300:hover {
+    border-color: #4b5563 !important;
+}
+
+/* Precizniji selektor za "Svi objavljeni mečevi" sekciju */
+html.dark body .mb-6 div.bg-white.rounded-xl.p-6.shadow-sm.mb-8 {
+    background-color: #101010 !important;
+    background-image: none !important;
+    border: 1px solid #2c2c2c !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Izrazito specifičan selektor koji ciljano postavlja pozadinu sekcije "Svi objavljeni mečevi" */
+html.dark body main .mb-6 > div.bg-white.rounded-xl.p-6.shadow-sm.mb-8 {
+    background-color: #101010 !important;
+    background-image: none !important;
+}
+
+/* Pojačana verzija selektora za potrebni element */
+html.dark .mb-6 > .bg-white.rounded-xl.p-6.shadow-sm.mb-8 {
+    background-color: #0a0a0a !important; /* Još tamnija pozadina */
+    background-image: none !important;
+}
+
+/* Stilovi za gumbe u sidebaru na Home stranici */
+html.dark .hover\:bg-gray-50:hover {
+    background-color: #2a2a2a !important; /* Tamnija siva za hover stanje */
+}
+
+/* Specifično za gumb "Svi objavljeni mečevi" */
+html.dark a[href*="Feed"] {
+    color: #d4d4d4 !important; /* Svjetliji tekst */
+}
+
+    html.dark a[href*="Feed"]:hover {
+        background-color: #333333 !important; /* Tamna pozadina na hover */
+        color: #ffffff !important; /* Bijeli tekst na hover */
+    }
+
+/* Za aktivni tab u sidebaru */
+/* Promjena boje teksta na selektiranom gumbu u sidebaru na bijelu */
+html.dark .bg-red-50.text-red-500 {
+    background-color: rgba(185, 28, 28, 0.25) !important; /* Malo tamnija crvena pozadina */
+    color: #fca5a5 !important; /* Bijeli tekst umjesto crvenog */
+}
+
+
+/* Za cijeli sidebar kontejner */
+html.dark .w-1/3 .bg-white.rounded-xl.shadow-sm.p-6 {
+    background-color: #1a1a1a !important;
+    border: 1px solid #2c2c2c !important;
+}
+
+/* Za naslove u sidebaru */
+html.dark .w-1/3 .text-lg.font-semibold.text-gray-900 {
+    color: #ffffff !important;
+}
+
+/* Za badge-ove (brojeve) u sidebaru */
+html.dark .bg-blue-100.text-blue-800 {
+    background-color: rgba(30, 58, 138, 0.3) !important;
+    color: #93c5fd !important;
+}
+
+html.dark .bg-yellow-100.text-yellow-800 {
+    background-color: rgba(120, 53, 15, 0.3) !important;
+    color: #fcd34d !important;
+}
+
+html.dark .bg-green-100.text-green-800 {
+    background-color: rgba(6, 78, 59, 0.3) !important;
+    color: #86efac !important;
+}
+
+/* wwwroot/css/light-mode.css i wwwroot/css/dark-mode.css */
+.content-padding {
+    padding-top: 4rem; /* 16px - odgovara pt-16 klasi u Tailwind CSS */
+}
+
+/* Za sidebar */
+#sidebar {
+    padding-top: 4rem;
+}
