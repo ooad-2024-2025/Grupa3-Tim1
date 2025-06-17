@@ -22,19 +22,31 @@ namespace Matchletic.Controllers
 
         // GET: Korisnik
         [Authorize]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm = null)
         {
             // Dohvati trenutno prijavljenog korisnika
             var currentUserId = HttpContext.Session.GetInt32("KorisnikID");
 
             // Dohvati sve korisnike osim trenutno prijavljenog
-            var korisnici = await _context.Korisnici
+            var query = _context.Korisnici
                 .Include(k => k.KorisnickiSportovi)
                     .ThenInclude(ks => ks.Sport)
                 .Include(k => k.MeceviKorisnika)
-                .Where(k => k.KorisnikID != currentUserId)
-                .ToListAsync();
+                .Where(k => k.KorisnikID != currentUserId);
 
+            // Ako postoji searchTerm, filtriraj rezultate
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(k => 
+                    k.Ime.ToLower().Contains(searchTerm) || 
+                    k.Prezime.ToLower().Contains(searchTerm) ||
+                    k.KorisnickiSportovi.Any(ks => ks.Sport.Naziv.ToLower().Contains(searchTerm))
+                );
+            }
+
+            var korisnici = await query.ToListAsync();
+            ViewBag.SearchTerm = searchTerm;
             return View(korisnici);
         }
 

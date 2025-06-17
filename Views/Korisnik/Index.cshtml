@@ -18,144 +18,94 @@
     <div class="mb-6">
         <h1 class="text-2xl font-bold mb-6 dark:text-white">Pronađi igrače</h1>
 
-        <div class="flex mb-4">
+        <form method="get" class="flex mb-4">
             <div class="relative flex-grow mr-4">
-                <input type="text" placeholder="Pretraži igrače po imenu ili sportu..."
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Pretraži igrače po imenu ili sportu..."
                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                 <i data-feather="search" class="absolute right-3 top-3 text-gray-400" width="18" height="18"></i>
             </div>
-            <button class="flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 dark:text-white">
-                <i data-feather="sliders" class="mr-2 text-gray-500 dark:text-gray-300" width="18" height="18"></i>
-                <span>Filteri</span>
+            <button type="submit" class="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                <i data-feather="search" class="mr-2" width="18" height="18"></i>
+                <span>Pretraži</span>
             </button>
-        </div>
+        </form>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach (var korisnik in Model)
         {
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center">
-                        @if (!string.IsNullOrEmpty(korisnik.ProfilnaSlika))
-                        {
-                            <img src="@korisnik.ProfilnaSlika" alt="@korisnik.Ime" class="w-12 h-12 rounded-full mr-3 object-cover" />
-                        }
-                        else
-                        {
-                            <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center mr-3">
-                                <span class="text-red-500 dark:text-red-300 font-bold">@korisnik.Ime.FirstOrDefault()</span>
-                            </div>
-                        }
-                        <div>
-                            <h3 class="font-medium dark:text-white">@korisnik.Ime @korisnik.Prezime</h3>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">
-                                <i data-feather="map-pin" class="inline-block" width="12" height="12"></i>
-                                @(string.IsNullOrEmpty(korisnik.Lokacija) ? "Nije navedeno" : korisnik.Lokacija)
-                            </span>
-                        </div>
-                    </div>
-                    <button type="button" onclick="openChallengeModal(@korisnik.KorisnikID)" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
-                        Izazovi
-                    </button>
-                </div>
-
-                <div class="flex items-center mb-3">
-                    <div class="flex text-yellow-400">
-                        @for (int i = 1; i <= 5; i++)
-                        {
-                            <i data-feather="star"
-                               class="@(i <= korisnik.Ocjena ? "text-yellow-400 fill-current" : "text-gray-300 dark:text-gray-600")"
-                               width="16" height="16"></i>
-                        }
-                    </div>
-                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">(@korisnik.Ocjena.ToString("0.0"))</span>
-                    <span class="ml-auto text-sm text-gray-600 dark:text-gray-400">
-                        <i data-feather="award" class="inline-block mr-1" width="14" height="14"></i>
-                        @(korisnik.MeceviKorisnika?.Count ?? 0) mečeva
-                    </span>
-                </div>
-
-                <div class="flex flex-wrap gap-2 mt-3">
-                    @if (korisnik.KorisnickiSportovi != null && korisnik.KorisnickiSportovi.Any())
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-4">
+                    @if (!string.IsNullOrEmpty(korisnik.ProfilnaSlika))
                     {
-                        foreach (var ks in korisnik.KorisnickiSportovi.Take(3)) // Prikazujemo najviše 3 sporta
-                        {
-                            <span class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white text-xs font-medium px-2.5 py-0.5 rounded-full">@ks.Sport.Naziv</span>
-                        }
-
-                        @if (korisnik.KorisnickiSportovi.Count > 3)
-                        {
-                            <span class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white text-xs font-medium px-2.5 py-0.5 rounded-full">+@(korisnik.KorisnickiSportovi.Count - 3)</span>
-                        }
+                        <img src="@korisnik.ProfilnaSlika" alt="@korisnik.Ime" class="w-16 h-16 rounded-full object-cover mr-4 border-2 border-white shadow" />
                     }
                     else
                     {
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Nema odabranih sportova</span>
+                        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mr-4 border-2 border-white shadow">
+                            <span class="text-red-500 font-bold text-xl">@korisnik.Ime.FirstOrDefault()</span>
+                        </div>
                     }
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">@korisnik.Ime @korisnik.Prezime</h3>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            <div class="flex items-center">
+                                <i data-feather="star" class="mr-1" width="14" height="14"></i>
+                                <span>@korisnik.Ocjena.ToString("0.0")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (korisnik.KorisnickiSportovi != null && korisnik.KorisnickiSportovi.Any())
+                {
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sportovi:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (var sport in korisnik.KorisnickiSportovi.Select(ks => ks.Sport))
+                            {
+                                <span class="px-2 py-1 bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 rounded-full text-xs">
+                                    @sport.Naziv
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="flex justify-end">
+                    <button onclick="showChallengeModal(@korisnik.KorisnikID)" 
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm">
+                        Izazovi na meč
+                    </button>
                 </div>
             </div>
         }
     </div>
-</div>
 
-<!-- Modal container -->
-<div id="modalContainer"></div>
+    @if (!Model.Any())
+    {
+        <div class="text-center py-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Nema rezultata</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                @(string.IsNullOrEmpty(ViewBag.SearchTerm) 
+                    ? "Trenutno nema dostupnih igrača." 
+                    : "Nema rezultata za vašu pretragu.")
+            </p>
+        </div>
+    }
+</div>
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            feather.replace();
-        });
-
-        function openChallengeModal(korisnikId) {
-            // Dohvati modal sadržaj AJAX-om
-            fetch(`@Url.Action("GetChallengeModal", "Korisnik")?korisnikId=${korisnikId}`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('modalContainer').innerHTML = html;
-                    document.getElementById('challengeModal').classList.remove('hidden');
-                    feather.replace(); // Ponovno inicijaliziramo ikone
-
-                    // Postavimo defaultne vrijednosti za datum i vrijeme
-                    setDefaultDateTimeValues();
-                });
-        }
-
-        function closeChallengeModal() {
-            document.getElementById('challengeModal').classList.add('hidden');
-        }
-
-        function setDefaultDateTimeValues() {
-            // Set default date to tomorrow
-            const dateInput = document.querySelector('#challengeModal input[name="DatumVrijeme"]');
-            if (dateInput) {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                const tomorrowYear = tomorrow.getFullYear();
-                const tomorrowMonth = (tomorrow.getMonth() + 1).toString().padStart(2, '0');
-                const tomorrowDay = tomorrow.getDate().toString().padStart(2, '0');
-                dateInput.value = `${tomorrowYear}-${tomorrowMonth}-${tomorrowDay}`;
-                dateInput.min = new Date().toISOString().split('T')[0]; // Set min date to today
-            }
-
-            // Set default time to current time rounded to next half hour
-            const timeSelect = document.querySelector('#challengeModal select[name="DatumVrijeme_Time"]');
-            if (timeSelect) {
-                const now = new Date();
-                now.setMinutes(now.getMinutes() + 30);
-                const roundedMinutes = now.getMinutes() < 30 ? 30 : 0;
-                const hours = now.getHours() + (now.getMinutes() >= 30 ? 1 : 0);
-                const hoursAdjusted = hours % 24;
-                const timeValue = `${hoursAdjusted.toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
-
-                for (let i = 0; i < timeSelect.options.length; i++) {
-                    if (timeSelect.options[i].value === timeValue) {
-                        timeSelect.selectedIndex = i;
-                        break;
-                    }
-                }
-            }
+        function showChallengeModal(korisnikId) {
+            $.get('@Url.Action("GetChallengeModal", "Korisnik")/' + korisnikId, function(data) {
+                $('#challengeModalContainer').html(data);
+                $('#challengeModal').modal('show');
+                feather.replace();
+            });
         }
     </script>
 }
