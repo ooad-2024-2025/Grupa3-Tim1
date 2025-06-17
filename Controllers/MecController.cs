@@ -12,7 +12,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Matchletic.Services;
 using Microsoft.AspNetCore.Identity;
-
+using QRCoder;
+using System.IO;
+using System.Drawing;
+using System.Net.Http;
 
 namespace Matchletic.Controllers
 {
@@ -23,7 +26,6 @@ namespace Matchletic.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly NotifikacijaService _notifikacijaService;
         private readonly MecRequestService _mecRequestService;
-
 
         public MecController(ApplicationDbContext context,
                              UserSyncService userSyncService,
@@ -61,7 +63,6 @@ namespace Matchletic.Controllers
             return View(myMatches);
         }
 
-
         // GET: Mec/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -75,6 +76,7 @@ namespace Matchletic.Controllers
                 .Include(m => m.Kreator)
                 .Include(m => m.KorisniciMeca)
                 .ThenInclude(km => km.Korisnik)
+                .Include(m => m.MecConfirmation)
                 .FirstOrDefaultAsync(m => m.MecID == id);
 
             if (mec == null)
@@ -99,8 +101,6 @@ namespace Matchletic.Controllers
 
             return View(mec);
         }
-
-
 
         // GET: Mec/Create
         public IActionResult Create()
@@ -187,7 +187,6 @@ namespace Matchletic.Controllers
             ViewBag.Sports = new SelectList(_context.Sportovi, "SportID", "Naziv", mec.SportID);
             return View(mec);
         }
-
 
         // POST: Mec/CreateFromModal
         // POST: Mec/CreateFromModal
@@ -315,7 +314,6 @@ namespace Matchletic.Controllers
             }
         }
 
-
         // POST: Mec/Join/5
         [Authorize]
         [HttpPost]
@@ -405,7 +403,7 @@ namespace Matchletic.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarkAsCompleted(int id, string rezultat)
+        public async Task<IActionResult> MarkAsCompleted(int id, string rezultat, bool isWinner)
         {
             // Get current user ID
             var korisnikID = HttpContext.Session.GetInt32("KorisnikID");
@@ -461,6 +459,18 @@ namespace Matchletic.Controllers
             // Update match
             mec.Status = StatusMeca.Zavrsen;
             mec.Rezultat = rezultat;
+
+            Console.WriteLine($"MarkAsCompleted: Match ID {id} status set to {mec.Status}. Result: {rezultat}");
+
+            // Add creator's confirmation
+            var creatorConfirmation = new MecConfirmation
+            {
+                MecID = id,
+                KorisnikID = korisnikID.Value,
+                IsWinner = isWinner,
+                ConfirmedAt = DateTime.Now
+            };
+            _context.MecConfirmation.Add(creatorConfirmation);
 
             _context.Update(mec);
             await _context.SaveChangesAsync();
@@ -573,7 +583,6 @@ namespace Matchletic.Controllers
             return View(mec);
         }
 
-
         // GET: Mec/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -668,8 +677,6 @@ namespace Matchletic.Controllers
             return View(sviMecevi);
         }
 
-
-
         // GET: Mec/MojiMecevi
         [Authorize]
         public async Task<IActionResult> MojiMecevi(string tab = "aktivni")
@@ -713,7 +720,151 @@ namespace Matchletic.Controllers
             return View(allUserMatches);
         }
 
+        // GET: Mec/UnesiRezultat/5
+        //ovo
+        [Authorize]
+        public async Task<IActionResult> UnesiRezultat(int id)
+        {
+            var mec = await _context.Mecevi.FindAsync(id);
+            if (mec == null) return NotFound();
 
+            var userId = HttpContext.Session.GetInt32("KorisnikID");
+            if (userId != mec.KreatorID) return Forbid();
+            if (DateTime.Now < mec.DatumMeca) return BadRequest("Meč još nije završen.");
+            if (mec.Status == StatusMeca.Zavrsen) return BadRequest("Rezultat već unesen.");
+
+            return View(mec);
+        }
+
+        // POST: Mec/UnesiRezultat
+        [HttpPost, ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> UnesiRezultat(int id, string rezultat)
+        {
+            var mec = await _context.Mecevi.FindAsync(id);
+            var userId = HttpContext.Session.GetInt32("KorisnikID");
+            if (mec == null || userId != mec.KreatorID) return Forbid();
+
+            mec.Rezultat = rezultat;
+            mec.Status = StatusMeca.Zavrsen;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // GET: Mec/GenerateQr/5
+        [Authorize]
+        [ResponseCache(Duration = 3600)] // Cache for 1 hour
+        public async Task<IActionResult> GenerateQr(int id)
+        {
+            var mec = await _context.Mecevi.FindAsync(id);
+            var userId = HttpContext.Session.GetInt32("KorisnikID");
+            if (mec == null || userId != mec.KreatorID || mec.Status != StatusMeca.Zavrsen)
+                return Forbid();
+
+            // Get the current host and scheme
+            var host = Request.Host.Value;
+            var scheme = Request.IsHttps ? "https" : "http";
+            var url = $"{scheme}://{host}{Url.Action("ConfirmResult", "Mec", new { id })}";
+            Console.WriteLine($"GenerateQr: Generated URL: {url}");
+
+            // Generate QR code locally using QRCoder
+            using (var qrGenerator = new QRCoder.QRCodeGenerator())
+            using (var qrCodeData = qrGenerator.CreateQrCode(url, QRCoder.QRCodeGenerator.ECCLevel.Q))
+            using (var qrCode = new QRCoder.PngByteQRCode(qrCodeData))
+            {
+                var qrCodeBytes = qrCode.GetGraphic(20);
+                Console.WriteLine($"GenerateQr: QR Code Bytes Length: {qrCodeBytes.Length}");
+                Response.Headers.Add("Cache-Control", "public, max-age=3600");
+                return File(qrCodeBytes, "image/png");
+            }
+        }
+        //ovoooo
+        // GET: Mec/ConfirmResult/5
+        [Authorize]
+        public async Task<IActionResult> ConfirmResult(int id)
+        {
+            var mec = await _context.Mecevi
+                .Include(m => m.KorisniciMeca)
+                .ThenInclude(km => km.Korisnik)
+                .Include(m => m.MecConfirmation)
+                .FirstOrDefaultAsync(m => m.MecID == id);
+
+            if (mec == null)
+            {
+                TempData["ErrorMessage"] = "Meč nije pronađen.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (mec.Status != StatusMeca.Zavrsen)
+            {
+                TempData["ErrorMessage"] = "Meč još nije završen.";
+                return RedirectToAction("Details", new { id });
+            }
+
+            var userId = HttpContext.Session.GetInt32("KorisnikID");
+            if (userId == null)
+            {
+                TempData["ErrorMessage"] = "Morate biti prijavljeni da biste potvrdili rezultat.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (!mec.KorisniciMeca.Any(k => k.KorisnikID == userId))
+            {
+                TempData["ErrorMessage"] = "Samo sudionici meča mogu potvrditi rezultat.";
+                return RedirectToAction("Details", new { id });
+            }
+
+            // Provjeri postoje li već unosi za tog korisnika
+            var existing = mec.MecConfirmation
+                              .FirstOrDefault(c => c.KorisnikID == userId);
+            if (existing != null)
+            {
+                // vraćamo već spremljeni entitet
+                return View(existing);
+            }
+
+            // pripremi novi objekt s već postavljenim MecID i KorisnikID
+            var confirmation = new MecConfirmation
+            {
+                MecID = id,
+                KorisnikID = userId.Value
+            };
+            return View(confirmation);
+        }
+        // POST: Mec/ConfirmResult
+        [HttpPost, ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> ConfirmResult(MecConfirmation model)
+        {
+            // Provjeri da korisnik ne laže u hidden poljima
+            var userId = HttpContext.Session.GetInt32("KorisnikID");
+            if (userId == null || model.KorisnikID != userId.Value)
+                return Forbid();
+
+            // Validacija atributima na MecConfirmation (npr. [Required])
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // Provjeri postoji li već zapis za tog korisnika
+            var existing = await _context.MecConfirmation
+                .FirstOrDefaultAsync(c => c.MecID == model.MecID
+                                       && c.KorisnikID == userId);
+            if (existing == null)
+            {
+                model.ConfirmedAt = DateTime.Now;
+                _context.MecConfirmation.Add(model);
+            }
+            else
+            {
+                existing.IsWinner = model.IsWinner;
+                existing.ConfirmedAt = DateTime.Now;
+                _context.MecConfirmation.Update(existing);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { id = model.MecID });
+        }
 
         // GET: Mec/TestDatabase
         public async Task<IActionResult> TestDatabase()
@@ -1122,8 +1273,5 @@ namespace Matchletic.Controllers
             var zahtjevi = await _mecRequestService.DohvatiPoslaneZahtjeveAsync(korisnikID.Value);
             return View(zahtjevi);
         }
-
-
-
     }
 }

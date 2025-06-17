@@ -22,6 +22,9 @@ namespace Matchletic.Data
         public DbSet<Postignuce> Postignuca { get; set; }
         public DbSet<KorisnikPostignuce> KorisnikPostignuca { get; set; }
 
+        public DbSet<MecConfirmation> MecConfirmation { get; set; }
+
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,6 +42,20 @@ namespace Matchletic.Data
                 .WithMany(k => k.MeceviKorisnika)
                 .HasForeignKey(mk => mk.KorisnikID);
 
+            // Configure MecConfirmation relationships
+            modelBuilder.Entity<MecConfirmation>()
+                .ToTable("MecConfirmation");
+
+            modelBuilder.Entity<MecConfirmation>()
+                .HasOne(mc => mc.Mec)
+                .WithMany(m => m.MecConfirmation)
+                .HasForeignKey(mc => mc.MecID);
+
+            modelBuilder.Entity<MecConfirmation>()
+                .HasOne(mc => mc.Korisnik)
+                .WithMany()
+                .HasForeignKey(mc => mc.KorisnikID);
+
             // Configure Recenzija relationships
             modelBuilder.Entity<Recenzija>()
                 .HasOne(r => r.Mec)
@@ -55,7 +72,7 @@ namespace Matchletic.Data
                 .HasOne(m => m.Sport)
                 .WithMany()
                 .HasForeignKey(m => m.SportID);
-                
+
             // Configure Mec foreign key to Korisnik (Creator)
             modelBuilder.Entity<Mec>()
                 .HasOne(m => m.Kreator)

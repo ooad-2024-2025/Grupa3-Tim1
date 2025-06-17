@@ -1,0 +1,40 @@
+@model Matchletic.Models.MecConfirmation
+
+@{
+    ViewData["Title"] = "Potvrda rezultata";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (Model.MecConfirmationID != 0)
+{
+    <p class="text-green-600">
+        Već ste potvrdili kao 
+        <strong>@(Model.IsWinner ? "pobjednik" : "gubitnik")</strong> 
+        @Model.ConfirmedAt.ToString("g").
+    </p>
+}
+else
+{
+    <form asp-action="ConfirmResult" method="post">
+        @Html.AntiForgeryToken()
+
+        <input asp-for="MecConfirmationID" type="hidden" />
+        <input asp-for="MecID" type="hidden" />
+        <input asp-for="KorisnikID" type="hidden" />
+
+        <div class="form-group">
+            <label asp-for="IsWinner" class="control-label">Jeste li pobijedili?</label><br/>
+            <input asp-for="IsWinner" type="radio" value="true" /> Da<br/>
+            <input asp-for="IsWinner" type="radio" value="false" /> Ne
+            <span asp-validation-for="IsWinner" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">Potvrdi</button>
+        <a asp-action="Details" asp-route-id="@Model.MecID" class="btn btn-secondary">Nazad</a>
+    </form>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

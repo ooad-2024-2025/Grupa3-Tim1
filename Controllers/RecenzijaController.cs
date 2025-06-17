@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Matchletic.Data;
 using Matchletic.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Matchletic.Controllers
 {
@@ -47,44 +48,77 @@ namespace Matchletic.Controllers
         }
 
         // GET: Recenzija/Create
-        public IActionResult Create()
+        [Authorize]
+        public IActionResult Create(int? mecId = null)
         {
-            // Dohvati mečeve s naslovom
+            // Get current user ID
+            var korisnikID = HttpContext.Session.GetInt32("KorisnikID");
+            if (korisnikID == null)
+            {
+                return Challenge();
+            }
+
+            // Dohvati mečeve s naslovom gdje je korisnik sudionik i meč je završen
             var mecevi = _context.Mecevi
+                .Where(m => m.Status == StatusMeca.Zavrsen && 
+                           m.KorisniciMeca.Any(km => km.KorisnikID == korisnikID) &&
+                           !m.Recenzije.Any(r => r.AutorID == korisnikID))
                 .Select(m => new
                 {
                     m.MecID,
-                    DisplayText = $"Mec ID: {m.MecID} - {m.Naslov}"
+                    DisplayText = $"{m.Naslov} ({m.DatumMeca.ToString("dd.MM.yyyy")})"
                 })
                 .ToList();
 
             // Kreiraj SelectList s informativnijim tekstom
-            ViewBag.MecOptions = new SelectList(mecevi, "MecID", "DisplayText");
+            ViewBag.MecOptions = new SelectList(mecevi, "MecID", "DisplayText", mecId);
 
-            // Dropdown za autora s imenom i prezimenom - ispravljeno
-            var korisnici = _context.Korisnici
-                .Select(k => new
-                {
-                    k.KorisnikID,
-                    PunoIme = $"{k.Ime} {k.Prezime}"
-                })
-                .ToList();
+            // Create new review with pre-filled values
+            var recenzija = new Recenzija
+            {
+                AutorID = korisnikID.Value,
+                MecID = mecId ?? 0
+            };
 
-            ViewBag.AutorOptions = new SelectList(korisnici, "KorisnikID", "PunoIme");
-
-            return View();
+            return View(recenzija);
         }
 
         // POST: Recenzija/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("RecenzijaID,MecID,Ocjena,Komentar,AutorID")] Recenzija recenzija)
+        [Authorize]
+        public async Task<IActionResult> Create([Bind("MecID,Ocjena,Komentar")] Recenzija recenzija)
         {
-            // Uklonite validacijske greške za navigacijska svojstva
-            ModelState.Remove("Mec");
-            ModelState.Remove("Autor");
+            // Get current user ID
+            var korisnikID = HttpContext.Session.GetInt32("KorisnikID");
+            if (korisnikID == null)
+            {
+                return Challenge();
+            }
+
+            // Set the author to the current user
+            recenzija.AutorID = korisnikID.Value;
+
+            // Validate that the user is a participant in the match
+            var mec = await _context.Mecevi
+                .Include(m => m.KorisniciMeca)
+                .FirstOrDefaultAsync(m => m.MecID == recenzija.MecID);
+
+            if (mec == null || mec.Status != StatusMeca.Zavrsen || 
+                !mec.KorisniciMeca.Any(km => km.KorisnikID == korisnikID))
+            {
+                ModelState.AddModelError("", "Ne možete recenzirati ovaj meč.");
+                return View(recenzija);
+            }
+
+            // Check if user already reviewed this match
+            var existingReview = await _context.Recenzije
+                .AnyAsync(r => r.MecID == recenzija.MecID && r.AutorID == korisnikID);
+            if (existingReview)
+            {
+                ModelState.AddModelError("", "Već ste recenzirali ovaj meč.");
+                return View(recenzija);
+            }
 
             if (ModelState.IsValid)
             {
@@ -92,45 +126,26 @@ namespace Matchletic.Controllers
                 {
                     _context.Add(recenzija);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction("Details", "Mec", new { id = recenzija.MecID });
                 }
                 catch (Exception ex)
                 {
                     ModelState.AddModelError("", "Greška pri dodavanju recenzije: " + ex.Message);
-                    Console.WriteLine($"Exception: {ex.Message}");
-                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                }
-            }
-            else
-            {
-                // Ispišite sve validacijske greške za debugging
-                foreach (var modelState in ViewData.ModelState.Values)
-                {
-                    foreach (var error in modelState.Errors)
-                    {
-                        Console.WriteLine($"Validation error: {error.ErrorMessage}");
-                    }
                 }
             }
 
-            // Ponovno postavljanje dropdown opcija
+            // Repopulate the match dropdown if there's an error
             var mecevi = _context.Mecevi
+                .Where(m => m.Status == StatusMeca.Zavrsen && 
+                           m.KorisniciMeca.Any(km => km.KorisnikID == korisnikID) &&
+                           !m.Recenzije.Any(r => r.AutorID == korisnikID))
                 .Select(m => new
                 {
                     m.MecID,
-                    DisplayText = $"Mec ID: {m.MecID} - {m.Naslov}"
+                    DisplayText = $"{m.Naslov} ({m.DatumMeca.ToString("dd.MM.yyyy")})"
                 })
                 .ToList();
             ViewBag.MecOptions = new SelectList(mecevi, "MecID", "DisplayText", recenzija.MecID);
-
-            var korisnici = _context.Korisnici
-                .Select(k => new
-                {
-                    k.KorisnikID,
-                    PunoIme = $"{k.Ime} {k.Prezime}"
-                })
-                .ToList();
-            ViewBag.AutorOptions = new SelectList(korisnici, "KorisnikID", "PunoIme", recenzija.AutorID);
 
             return View(recenzija);
         }

@@ -84,64 +84,12 @@ namespace Matchletic.Controllers
                 return NotFound();
             }
 
-            // Dohvati statistiku korisnika
-            var zavrseniMecevi = await _context.MeceviKorisnici
-                .Where(mk => mk.KorisnikID == korisnikID)
-                .Include(mk => mk.Mec)
-                    .ThenInclude(m => m.Sport)
-                .Where(mk => mk.Mec.Status == StatusMeca.Zavrsen)
-                .OrderByDescending(mk => mk.Mec.DatumMeca)
-                .Select(mk => mk.Mec)
-                .ToListAsync();
+            // Izračunaj broj pobjeda i poraza koristeći MecConfirmation
+            var ukupnoPobjeda = await _context.MecConfirmation.CountAsync(mc => mc.KorisnikID == korisnikID && mc.IsWinner);
+            var ukupnoPoraza = await _context.MecConfirmation.CountAsync(mc => mc.KorisnikID == korisnikID && !mc.IsWinner);
+            var ukupnoMeceva = ukupnoPobjeda + ukupnoPoraza;
+            int winRate = ukupnoMeceva > 0 ? (int)((double)ukupnoPobjeda / ukupnoMeceva * 100) : 0;
 
-            var kreiraniMecevi = _context.Mecevi
-                .Count(m => m.KreatorID == korisnikID);
-
-            // Calculate win rate (you'd need to implement logic to determine wins)
-            // For this example, we'll use a placeholder value
-            // Izračunaj stvarnu stopu pobjeda na temelju rezultata završenih mečeva
-            int ukupnoMeceva = zavrseniMecevi.Count;
-            int ukupnoPobjeda = 0;
-            int winRate;
-
-            if (ukupnoMeceva > 0)
-            {
-                // Pretpostavljamo da je korisnik pobjednik ako je njegov tim prvi u rezultatu
-                // npr. "2-1" za formata "TIM1-TIM2"
-                foreach (var mec in zavrseniMecevi)
-                {
-                    if (!string.IsNullOrEmpty(mec.Rezultat) && mec.Rezultat.Contains("-"))
-                    {
-                        var rezultati = mec.Rezultat.Split('-');
-                        if (rezultati.Length == 2)
-                        {
-                            int rezultatTim1, rezultatTim2;
-                            if (int.TryParse(rezultati[0], out rezultatTim1) &&
-                                int.TryParse(rezultati[1], out rezultatTim2))
-                            {
-                                // Provjeri je li korisnik kreator (Tim 1) ili gost (Tim 2)
-                                bool jeKreator = mec.KreatorID == korisnikID;
-
-                                // Pobjeda ako je korisnik kreator i Tim 1 ima veći rezultat
-                                // ili ako korisnik nije kreator i Tim 2 ima veći rezultat
-                                if ((jeKreator && rezultatTim1 > rezultatTim2) ||
-                                    (!jeKreator && rezultatTim2 > rezultatTim1))
-                                {
-                                    ukupnoPobjeda++;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Izračunaj postotak pobjeda
-                winRate = (int)((double)ukupnoPobjeda / ukupnoMeceva * 100);
-            }
-            else
-            {
-                // Ako nema završenih mečeva, stopa pobjeda je 0
-                winRate = 0;
-            }
             // User rank from leaderboard (placeholder)
             var rank = "1,234";
 
@@ -191,9 +139,9 @@ namespace Matchletic.Controllers
                 values.Add(activity?.Count ?? 0);
             }
 
-            ViewBag.ZavrseniMecevi = zavrseniMecevi;
-            ViewBag.KreiraniMecevi = kreiraniMecevi;
-            ViewBag.MatchesPlayed = zavrseniMecevi;
+            ViewBag.ZavrseniMecevi = korisnikProfil.MeceviKorisnika.Select(mk => mk.Mec).ToList();
+            ViewBag.KreiraniMecevi = _context.Mecevi.Count(m => m.KreatorID == korisnikID);
+            ViewBag.MatchesPlayed = korisnikProfil.MeceviKorisnika.Select(mk => mk.Mec).ToList();
             ViewBag.WinRate = winRate;
             ViewBag.Rating = korisnikProfil.Ocjena;
             ViewBag.Rank = rank;
