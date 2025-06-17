@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Matchletic")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+02487ad3dc94c52c2850587ca2bc4309fe0a473f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1ed0f16527c9e5274e822321cfccf56f8ff495d5")]
 [assembly: System.Reflection.AssemblyProductAttribute("Matchletic")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Matchletic")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
