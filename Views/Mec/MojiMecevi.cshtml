@@ -99,10 +99,6 @@
             <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                 Trenutno nemate mečeva. Pridružite se nekom meču ili kreirajte novi.
             </p>
-            <button type="button" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-colors inline-flex items-center" onclick="openCreateMecModal()">
-                <i data-feather="plus" class="mr-2" width="18" height="18"></i>
-                Kreiraj meč
-            </button>
         </div>
     }
 </div>
@@ -114,22 +110,6 @@
         {
             <partial name="_MatchCard" model="mec" />
         }
-    }
-    else
-    {
-        <div class="col-span-3 py-12 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema kreiranih mečeva</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                Još niste kreirali nijedan meč. Kreirajte svoj prvi meč.
-            </p>
-            <button type="button" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition-colors inline-flex items-center" onclick="openCreateMecModal()">
-                <i data-feather="plus" class="mr-2" width="18" height="18"></i>
-                Kreiraj meč
-            </button>
-        </div>
     }
 </div>
 
@@ -238,16 +218,6 @@
             <partial name="_MatchCard" model="mec" />
         }
     }
-    else
-    {
-        <div class="col-span-3 py-12 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema objavljenih mečeva</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Trenutno nemate objavljenih mečeva.</p>
-        </div>
-    }
 </div>
 
 <div id="dogovoreni-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
@@ -258,16 +228,6 @@
             <partial name="_MatchCard" model="mec" />
         }
     }
-    else
-    {
-        <div class="col-span-3 py-12 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema dogovorenih mečeva</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Trenutno nemate dogovorenih mečeva.</p>
-        </div>
-    }
 </div>
 
 <div id="zavrseni-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
@@ -277,16 +237,6 @@
         {
             <partial name="_MatchCard" model="mec" />
         }
-    }
-    else
-    {
-        <div class="col-span-3 py-12 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Nema završenih mečeva</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Trenutno nemate završenih mečeva.</p>
-        </div>
     }
 </div>
 
