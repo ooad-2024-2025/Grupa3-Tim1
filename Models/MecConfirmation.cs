@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Matchletic.Models
 {
-    [Table("MecConfirmation")]
+    [Table("MecConfirmations")]
     public class MecConfirmation
     {
         [Key]

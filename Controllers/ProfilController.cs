@@ -77,7 +77,7 @@ namespace Matchletic.Controllers
                 .ThenInclude(ks => ks.Sport)
                 .Include(k => k.MeceviKorisnika)
                 .ThenInclude(mk => mk.Mec)
-                .ThenInclude(m => m.MecConfirmation)
+                .ThenInclude(m => m.MecConfirmations)
                 .FirstOrDefaultAsync(k => k.KorisnikID == korisnikID);
 
             if (korisnikProfil == null)
@@ -85,9 +85,9 @@ namespace Matchletic.Controllers
                 return NotFound();
             }
 
-            // Izračunaj broj pobjeda i poraza koristeći MecConfirmation
-            var ukupnoPobjeda = await _context.MecConfirmation.CountAsync(mc => mc.KorisnikID == korisnikID && mc.IsWinner);
-            var ukupnoPoraza = await _context.MecConfirmation.CountAsync(mc => mc.KorisnikID == korisnikID && !mc.IsWinner);
+            // Izračunaj broj pobjeda i poraza koristeći MecConfirmations
+            var ukupnoPobjeda = await _context.MecConfirmations.CountAsync(mc => mc.KorisnikID == korisnikID && mc.IsWinner);
+            var ukupnoPoraza = await _context.MecConfirmations.CountAsync(mc => mc.KorisnikID == korisnikID && !mc.IsWinner);
             var ukupnoMeceva = ukupnoPobjeda + ukupnoPoraza;
             int winRate = ukupnoMeceva > 0 ? (int)((double)ukupnoPobjeda / ukupnoMeceva * 100) : 0;
 

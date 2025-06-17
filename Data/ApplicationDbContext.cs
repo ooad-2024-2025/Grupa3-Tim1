@@ -22,7 +22,7 @@ namespace Matchletic.Data
         public DbSet<Postignuce> Postignuca { get; set; }
         public DbSet<KorisnikPostignuce> KorisnikPostignuca { get; set; }
 
-        public DbSet<MecConfirmation> MecConfirmation { get; set; }
+        public DbSet<MecConfirmation> MecConfirmations { get; set; }
 
 
 
@@ -44,11 +44,11 @@ namespace Matchletic.Data
 
             // Configure MecConfirmation relationships
             modelBuilder.Entity<MecConfirmation>()
-                .ToTable("MecConfirmation");
+                .ToTable("MecConfirmations");
 
             modelBuilder.Entity<MecConfirmation>()
                 .HasOne(mc => mc.Mec)
-                .WithMany(m => m.MecConfirmation)
+                .WithMany(m => m.MecConfirmations)
                 .HasForeignKey(mc => mc.MecID);
 
             modelBuilder.Entity<MecConfirmation>()

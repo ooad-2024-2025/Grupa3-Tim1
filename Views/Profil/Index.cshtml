@@ -190,7 +190,7 @@
                                     <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">@(mec.Mec.KorisniciMeca.FirstOrDefault(km => km.KorisnikID != Model.KorisnikID)?.Korisnik?.Ime ?? "Razni protivnici")</td>
                                     <td class="px-4 py-3">
                                         @{
-                                            var confirmation = mec.Mec.MecConfirmation?.FirstOrDefault(mc => mc.KorisnikID == Model.KorisnikID);
+                                            var confirmation = mec.Mec.MecConfirmations?.FirstOrDefault(mc => mc.KorisnikID == Model.KorisnikID);
                                             var ishod = "Neriješeno";
                                             var ishodClass = "bg-yellow-100 text-yellow-800";
                                             if (confirmation != null)

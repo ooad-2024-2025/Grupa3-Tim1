@@ -76,7 +76,7 @@ namespace Matchletic.Controllers
                 .Include(m => m.Kreator)
                 .Include(m => m.KorisniciMeca)
                 .ThenInclude(km => km.Korisnik)
-                .Include(m => m.MecConfirmation)
+                .Include(m => m.MecConfirmations)
                 .FirstOrDefaultAsync(m => m.MecID == id);
 
             if (mec == null)
@@ -470,7 +470,7 @@ namespace Matchletic.Controllers
                 IsWinner = isWinner,
                 ConfirmedAt = DateTime.Now
             };
-            _context.MecConfirmation.Add(creatorConfirmation);
+            _context.MecConfirmations.Add(creatorConfirmation);
 
             _context.Update(mec);
             await _context.SaveChangesAsync();
@@ -787,7 +787,7 @@ namespace Matchletic.Controllers
             var mec = await _context.Mecevi
                 .Include(m => m.KorisniciMeca)
                 .ThenInclude(km => km.Korisnik)
-                .Include(m => m.MecConfirmation)
+                .Include(m => m.MecConfirmations)
                 .FirstOrDefaultAsync(m => m.MecID == id);
 
             if (mec == null)
@@ -816,7 +816,7 @@ namespace Matchletic.Controllers
             }
 
             // Provjeri postoje li već unosi za tog korisnika
-            var existing = mec.MecConfirmation
+            var existing = mec.MecConfirmations
                               .FirstOrDefault(c => c.KorisnikID == userId);
             if (existing != null)
             {
@@ -847,19 +847,19 @@ namespace Matchletic.Controllers
                 return View(model);
 
             // Provjeri postoji li već zapis za tog korisnika
-            var existing = await _context.MecConfirmation
+            var existing = await _context.MecConfirmations
                 .FirstOrDefaultAsync(c => c.MecID == model.MecID
                                        && c.KorisnikID == userId);
             if (existing == null)
             {
                 model.ConfirmedAt = DateTime.Now;
-                _context.MecConfirmation.Add(model);
+                _context.MecConfirmations.Add(model);
             }
             else
             {
                 existing.IsWinner = model.IsWinner;
                 existing.ConfirmedAt = DateTime.Now;
-                _context.MecConfirmation.Update(existing);
+                _context.MecConfirmations.Update(existing);
             }
 
             await _context.SaveChangesAsync();
