@@ -77,6 +77,7 @@ namespace Matchletic.Controllers
                 .ThenInclude(ks => ks.Sport)
                 .Include(k => k.MeceviKorisnika)
                 .ThenInclude(mk => mk.Mec)
+                .ThenInclude(m => m.MecConfirmation)
                 .FirstOrDefaultAsync(k => k.KorisnikID == korisnikID);
 
             if (korisnikProfil == null)
