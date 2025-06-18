@@ -25,6 +25,18 @@
       "PackagePath": "staticwebassets\\js\\site.js"
     },
     {
+      "Id": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\wwwroot\\js\\webcam.js",
+      "PackagePath": "staticwebassets\\js\\webcam.js"
+    },
+    {
+      "Id": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\wwwroot\\js\\webcam.min.js",
+      "PackagePath": "staticwebassets\\js\\webcam.min.js"
+    },
+    {
+      "Id": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\wwwroot\\js\\webcam.swf",
+      "PackagePath": "staticwebassets\\js\\webcam.swf"
+    },
+    {
       "Id": "D:\\Ismail\\ETF\\DrugaGodina\\CetvrtiSemestar\\ObjektnoOrijetisanaAnalizaIDizajn\\Matchletic\\wwwroot\\lib\\bootstrap\\LICENSE",
       "PackagePath": "staticwebassets\\lib\\bootstrap"
     },

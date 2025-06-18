@@ -1,48 +1,66 @@
 ﻿@model Matchletic.Models.Recenzija
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Nova recenzija";
 }
 
-<h1>Create</h1>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Nova recenzija</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="All" class="text-danger mb-4"></div>
 
-<h4>Recenzija</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="MecID" class="control-label">Mec</label>
-                <select asp-for="MecID" class="form-control" asp-items="ViewBag.MecOptions"></select>
-                <span asp-validation-for="MecID" class="text-danger"></span>
+                        <div class="mb-4">
+                            <label asp-for="MecID" class="form-label">Meč</label>
+                            <select asp-for="MecID" class="form-select" asp-items="ViewBag.MecOptions">
+                                <option value="">-- Odaberite meč --</option>
+                            </select>
+                            <span asp-validation-for="MecID" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Ocjena" class="form-label">Ocjena</label>
+                            <input asp-for="Ocjena" class="form-control" min="1" max="5" placeholder="Unesite ocjenu od 1 do 5" />
+                            <span asp-validation-for="Ocjena" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Komentar" class="form-label">Komentar</label>
+                            <textarea asp-for="Komentar" class="form-control" rows="4"
+                                      placeholder="Unesite vaš komentar"></textarea>
+                            <span asp-validation-for="Komentar" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="AutorID" class="form-label">Autor</label>
+                            <select asp-for="AutorID" class="form-select" asp-items="ViewBag.AutorOptions">
+                                <option value="">-- Odaberite autora --</option>
+                            </select>
+                            <span asp-validation-for="AutorID" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Natrag na popis
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> Spremi recenziju
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Ocjena" class="control-label"></label>
-                <input asp-for="Ocjena" class="form-control" />
-                <span asp-validation-for="Ocjena" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Komentar" class="control-label"></label>
-                <input asp-for="Komentar" class="form-control" />
-                <span asp-validation-for="Komentar" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AutorID" class="control-label">Autor</label>
-                <select asp-for="AutorID" class="form-control" asp-items="ViewBag.AutorOptions"></select>
-                <span asp-validation-for="AutorID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

@@ -109,6 +109,16 @@
                 </div>
             }
 
+            <p>Snimanje zvuka koristeći mikrofon:</p>
+            <input type=button id="record" class="btn btn-primary" value="Snimaj"
+                   onClick="record_audio()">
+            <input type=button id="stop" class="btn btn-primary" value="Završi"
+                   onClick="record_audio()">
+            <br />
+            <br />
+            <p>Reprodukcija snimljenog zvuka:</p>
+            <audio id="player" controls style="width: 100%"></audio>
+
             <!-- U Details.cshtml - dio za Akcijska dugmad -->
             <!-- U Details.cshtml - dio za Akcijska dugmad -->
             <div class="flex flex-wrap gap-3 mt-8">
@@ -286,6 +296,7 @@
 
 <partial name="_CompleteMecModal" />
 
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -300,5 +311,28 @@
         function closeCompleteMecModal() {
             document.getElementById('completeMecModal').classList.add('hidden');
         }
+
+
+        var audio = document.getElementById('player');
+        var constraints = { audio: true };
+        navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+        var mediaRecorder = new MediaRecorder(stream);
+        var chunks = [];
+        mediaRecorder.addEventListener('dataavailable', function (event) {
+        chunks.push(event.data);
+        });
+        mediaRecorder.addEventListener('stop', function () {
+        var blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+        var url = URL.createObjectURL(blob);
+        audio.src = url;
+        chunks = []; // reset
+        });
+        document.getElementById('record').addEventListener('click', function () {
+        mediaRecorder.start();
+        });
+        document.getElementById('stop').addEventListener('click', function () {
+        mediaRecorder.stop();
+        });
+        });
     </script>
 }
