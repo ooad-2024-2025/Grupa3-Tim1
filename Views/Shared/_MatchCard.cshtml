@@ -5,11 +5,17 @@
     var isObjavljen = Model.Status == StatusMeca.Objavljen;
     var isDogovoren = Model.Status == StatusMeca.Dogovoren;
     var isZavrsen = Model.Status == StatusMeca.Zavrsen;
+    var isCekaPrihvacanje = Model.Status == StatusMeca.CekaPrihvacanje;
+    var isIzazov = isCekaPrihvacanje || (Model.BrojIgraca == 2 && Model.JePrivatan);
     var sportNaziv = Model.Sport?.Naziv ?? "Sport";
     var lokacija = Model.Lokacija ?? "Nije određeno";
     var brojIgraca = Model.KorisniciMeca?.Count ?? 0;
     var potrebanBrojIgraca = Model.BrojIgraca;
     var isUserInMatch = Model.KorisniciMeca?.Any(km => km.KorisnikID == currentUserId) ?? false;
+
+    // Provjeri je li korisnik već prihvatio izazov
+    var userMecRelation = Model.KorisniciMeca?.FirstOrDefault(km => km.KorisnikID == currentUserId);
+    var hasUserAccepted = userMecRelation?.JePrihvacen ?? false;
 
     // Provjeri je li korisnik već poslao zahtjev za ovaj meč
     var zahtjevPoslan = ViewBag.ZahtjevPoslan != null ?
@@ -21,89 +27,156 @@
     var kreatorPrezime = Model.Kreator?.Prezime ?? "";
     var kreatorPunoIme = $"{kreatorIme} {kreatorPrezime}";
 
+    // Izazvani korisnik info - za izazove
+    var izazvaniKorisnik = isIzazov ? Model.KorisniciMeca?.FirstOrDefault(mk => mk.KorisnikID != Model.KreatorID)?.Korisnik : null;
+    var izazvaniIme = izazvaniKorisnik?.Ime ?? "Nepoznato";
+    var izazvaniPrezime = izazvaniKorisnik?.Prezime ?? "";
+    var izazvaniPunoIme = $"{izazvaniIme} {izazvaniPrezime}";
+
     // Limit opisa na 100 znakova
     var skraceniOpis = !string.IsNullOrWhiteSpace(Model.Opis) && Model.Opis.Length > 100
         ? Model.Opis.Substring(0, 97) + "..."
         : Model.Opis;
+
+    // Određivanje boje bordere ovisno o tipu meča
+    // Izazovi su uvijek crveni, osim ako su završeni (onda su zeleni)
+    // Regularne mečeve zadržavamo prema statusu: objavljeni=plavi, dogovoreni=žuti, završeni=zeleni
+    var borderClass = isIzazov
+        ? (isZavrsen ? "border-2 border-green-400 dark:border-green-600" : "border-2 border-red-400 dark:border-red-600")
+        : (isObjavljen ? "border-2 border-blue-300 dark:border-blue-700"
+          : isDogovoren ? "border-2 border-yellow-400 dark:border-yellow-600"
+          : isZavrsen ? "border-2 border-green-400 dark:border-green-600"
+          : "border-2 border-gray-300 dark:border-gray-700");
+
+    // Provjeri je li ovo primljeni izazov koji čeka korisnikov odgovor
+    var isPrimljenIzazov = isIzazov && !isCreator && isUserInMatch && !hasUserAccepted;
 }
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden @borderClass">
     <div class="p-5">
-        <div class="flex justify-between items-start mb-2">
-            <h3 class="text-lg font-semibold text-gray-900 capitalize">@Model.Naslov</h3>
-            <div class="rounded-full px-2.5 py-1 text-xs font-medium ml-2 flex-shrink-0"
-                 style="@(isObjavljen ? "background-color: #E3F2FD; color: #1565C0" :
-                       isDogovoren ? "background-color: #FFF8E1; color: #F57C00" :
-                       isZavrsen ? "background-color: #E8F5E9; color: #2E7D32" : "")">
-                @Model.Status
+        <div class="flex justify-between items-start mb-3">
+            <div>
+                <h3 class="font-semibold text-gray-900 dark:text-white text-lg">@Model.Naslov</h3>
+                <!-- Kreator info -->
+                @if (!isIzazov)
+                {
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        <i data-feather="user" class="inline-block mr-1" width="14" height="14"></i>
+                        Kreirao: @kreatorPunoIme
+                    </p>
+                }
+                else if (isIzazov)
+                {
+                    @if (isCreator)
+                    {
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            <i data-feather="star" class="inline-block mr-1 text-red-500" width="14" height="14"></i>
+                            <span class="font-medium">Moj izazov za:</span> @izazvaniPunoIme
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            <i data-feather="user" class="inline-block mr-1 text-red-500" width="14" height="14"></i>
+                            <span class="font-medium">Izazivač:</span> @kreatorPunoIme
+                        </p>
+                    }
+                }
             </div>
+            <span class="rounded-full px-2.5 py-1 text-xs font-medium"
+                  style="@(isObjavljen ? "background-color: #E3F2FD; color: #1565C0" :
+                         isDogovoren ? "background-color: #FFF8E1; color: #F57C00" :
+                         isZavrsen ? "background-color: #E8F5E9; color: #2E7D32" :
+                         isCekaPrihvacanje ? "background-color: #FFF3CD; color: #D97706" : "")">
+                @if (isPrimljenIzazov)
+                {
+                    <span>Čeka odgovor</span>
+                }
+                else
+                {
+                    @Model.Status
+                }
+            </span>
         </div>
 
-        <!-- Prikaz opisa ispod naslova s ograničenom dužinom -->
+        <!-- Prikaz opisa ispod naslova -->
         @if (!string.IsNullOrWhiteSpace(Model.Opis))
         {
-            <div class="text-sm text-gray-600 mb-4">
-                @skraceniOpis
-            </div>
+            <p class="text-gray-700 dark:text-gray-300 text-sm mb-4">@skraceniOpis</p>
         }
 
-        <!-- Kreator info -->
-        <div class="text-sm text-gray-500 mb-3 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span>Kreirao: @kreatorPunoIme</span>
-        </div>
-
-        <div class="space-y-2 mb-4">
-            <div class="flex items-center text-gray-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
-                </svg>
-                <span>@sportNaziv</span>
+        <!-- Informacije o meču u grid layoutu -->
+        <div class="grid grid-cols-2 gap-3 text-sm mb-4">
+            <div>
+                <span class="block text-gray-500 dark:text-gray-400">Sport</span>
+                <span class="font-medium text-gray-900 dark:text-white">@sportNaziv</span>
             </div>
-            <div class="flex items-center text-gray-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>@Model.DatumMeca.ToString("dd MMM yyyy")</span>
+            <div>
+                <span class="block text-gray-500 dark:text-gray-400">Lokacija</span>
+                <span class="font-medium text-gray-900 dark:text-white">@lokacija</span>
             </div>
-            <div class="flex items-center text-gray-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>@Model.DatumMeca.ToString("HH:mm")</span>
+            <div>
+                <span class="block text-gray-500 dark:text-gray-400">Datum</span>
+                <span class="font-medium text-gray-900 dark:text-white">@Model.DatumMeca.ToString("dd.MM.yyyy")</span>
             </div>
-            <div class="flex items-center text-gray-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>@lokacija</span>
+            <div>
+                <span class="block text-gray-500 dark:text-gray-400">Vrijeme</span>
+                <span class="font-medium text-gray-900 dark:text-white">@Model.DatumMeca.ToString("HH:mm")</span>
             </div>
-            <div class="flex items-center text-gray-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span>@brojIgraca / @potrebanBrojIgraca igrača</span>
-            </div>
+            @if (!isIzazov)
+            {
+                <div class="col-span-2">
+                    <span class="block text-gray-500 dark:text-gray-400">Igrači</span>
+                    <span class="font-medium text-gray-900 dark:text-white">@brojIgraca / @potrebanBrojIgraca</span>
+                </div>
+            }
         </div>
 
         @if (isZavrsen && !string.IsNullOrEmpty(Model.Rezultat))
         {
-            <div class="bg-gray-50 -mx-5 px-5 py-3 mb-4">
-                <div class="font-medium text-gray-900 mb-1">Rezultat</div>
-                <div class="text-gray-700">@Model.Rezultat</div>
+            <div class="bg-gray-50 dark:bg-gray-700/50 -mx-5 px-5 py-3 mb-4">
+                <div class="font-medium text-gray-900 dark:text-white mb-1">Rezultat</div>
+                <div class="text-gray-700 dark:text-gray-300">@Model.Rezultat</div>
             </div>
         }
 
-        <div class="flex flex-wrap gap-2 mt-4">
-            @if (isObjavljen && !isCreator && !isUserInMatch && brojIgraca < potrebanBrojIgraca)
+        <!-- Status čekanja prihvaćanja za izazove -->
+        @if (isCekaPrihvacanje && !isPrimljenIzazov)
+        {
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400 px-4 py-2 rounded-lg text-sm mb-4 flex items-center">
+                <i data-feather="clock" class="mr-2" width="16" height="16"></i>
+                <span>Čeka prihvaćanje izazova</span>
+            </div>
+        }
+
+        <!-- Akcijske tipke -->
+        <div class="flex space-x-2">
+            @if (isPrimljenIzazov)
+            {
+                <!-- Buttons for received challenges that need to be accepted or rejected -->
+                <form asp-action="AcceptChallenge" asp-controller="Mec" method="post" class="flex-1">
+                    <input type="hidden" name="id" value="@Model.MecID" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center justify-center">
+                        <i data-feather="check" class="mr-2" width="16" height="16"></i>
+                        <span>Prihvati</span>
+                    </button>
+                </form>
+                <form asp-action="RejectChallenge" asp-controller="Mec" method="post" class="flex-1">
+                    <input type="hidden" name="id" value="@Model.MecID" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center justify-center">
+                        <i data-feather="x" class="mr-2" width="16" height="16"></i>
+                        <span>Odbij</span>
+                    </button>
+                </form>
+            }
+            else if (isObjavljen && !isCreator && !isUserInMatch && brojIgraca < potrebanBrojIgraca)
             {
                 @if (zahtjevPoslan)
                 {
                     <!-- Prikaži informaciju da je zahtjev već poslan -->
-                    <div class="w-full bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-center text-sm">
+                    <div class="w-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 px-4 py-2 rounded-lg text-center text-sm">
                         <i data-feather="clock" class="inline-block mr-1" width="14" height="14"></i>
                         Zahtjev poslan - čeka se odgovor
                     </div>
@@ -113,7 +186,7 @@
                     <!-- Forma za slanje zahtjeva -->
                     <form action="@Url.Action("PosaljiZahtjev", "Mec", new { id = Model.MecID })" method="post" class="w-full">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full transition-colors text-center w-full flex items-center justify-center">
+                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center justify-center">
                             <i data-feather="send" class="mr-2" width="16" height="16"></i>
                             <span>Pošalji zahtjev</span>
                         </button>
@@ -122,14 +195,14 @@
             }
             else
             {
-                <a href="@Url.Action("Details", "Mec", new { id = Model.MecID })" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full transition-colors text-center flex-grow flex items-center justify-center">
+                <a href="@Url.Action("Details", "Mec", new { id = Model.MecID })" class="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center justify-center">
                     <i data-feather="eye" class="mr-2" width="16" height="16"></i>
                     <span>Detalji</span>
                 </a>
 
                 @if (isDogovoren && isCreator)
                 {
-                    <button onclick="showCompleteMecModal(@Model.MecID)" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full transition-colors text-center flex-grow flex items-center justify-center">
+                    <button onclick="showCompleteMecModal(@Model.MecID)" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center justify-center">
                         <i data-feather="check-circle" class="mr-2" width="16" height="16"></i>
                         <span>Završi meč</span>
                     </button>
@@ -137,7 +210,7 @@
 
                 @if (isCreator && Model.Status != StatusMeca.Zavrsen)
                 {
-                    <a href="@Url.Action("Edit", "Mec", new { id = Model.MecID })" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-2 rounded-full transition-colors text-center flex-grow flex items-center justify-center">
+                    <a href="@Url.Action("Edit", "Mec", new { id = Model.MecID })" class="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center justify-center">
                         <i data-feather="edit-2" class="mr-2" width="16" height="16"></i>
                         <span>Uredi</span>
                     </a>

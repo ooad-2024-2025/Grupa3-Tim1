@@ -18,27 +18,61 @@ namespace Matchletic.Services
             _context = context;
         }
 
-        public async Task KreirajNotifikacijuIzazovaAsync(int korisnikID, int mecID, int kreatorID)
+        public async Task<bool> KreirajNotifikacijuIzazovaAsync(int korisnikID, int mecID, int kreatorID)
         {
-            var kreator = await _context.Korisnici.FindAsync(kreatorID);
-            var mec = await _context.Mecevi.FindAsync(mecID);
-
-            if (kreator != null && mec != null)
+            try
             {
-                var notifikacija = new Notifikacija
-                {
-                    KorisnikID = korisnikID,
-                    Naslov = "Novi izazov",
-                    Sadrzaj = $"{kreator.Ime} {kreator.Prezime} te izazvao na meč: {mec.Naslov}",
-                    Url = $"/Mec/Details/{mecID}",
-                    Tip = NotifikacijaTip.Izazov,
-                    DatumKreiranja = DateTime.Now
-                };
+                // Dodajte detaljno zapisivanje
+                Console.WriteLine($"DEBUG: Kreiranje notifikacije izazova - korisnikID={korisnikID}, mecID={mecID}, kreatorID={kreatorID}");
 
-                _context.Notifikacije.Add(notifikacija);
-                await _context.SaveChangesAsync();
+                var kreator = await _context.Korisnici.FindAsync(kreatorID);
+                var mec = await _context.Mecevi.FindAsync(mecID);
+
+                Console.WriteLine($"DEBUG: Kreator pronađen: {kreator != null}, Meč pronađen: {mec != null}");
+
+                if (kreator != null && mec != null)
+                {
+                    var notifikacija = new Notifikacija
+                    {
+                        KorisnikID = korisnikID,
+                        Naslov = "Novi izazov",
+                        Sadrzaj = $"{kreator.Ime} {kreator.Prezime} te izazvao na meč: {mec.Naslov}",
+                        Url = $"/Mec/Details/{mecID}",
+                        Tip = NotifikacijaTip.Izazov,
+                        DatumKreiranja = DateTime.Now
+                    };
+
+                    try
+                    {
+                        _context.Notifikacije.Add(notifikacija);
+                        await _context.SaveChangesAsync();
+                        Console.WriteLine("DEBUG: Notifikacija uspješno spremljena u bazu");
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"DEBUG: Greška pri spremanju notifikacije: {ex.Message}");
+                        if (ex.InnerException != null)
+                        {
+                            Console.WriteLine($"DEBUG: Inner exception: {ex.InnerException.Message}");
+                        }
+                        throw;
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DEBUG: Greška pri kreiranju notifikacije: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"DEBUG: Inner exception: {ex.InnerException.Message}");
+                }
+                return false;
             }
         }
+
+
 
         public async Task KreirajNotifikacijuPrihvacenogIzazovaAsync(int kreatorID, int mecID, int prihvatioID)
         {

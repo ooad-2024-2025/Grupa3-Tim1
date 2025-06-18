@@ -1,0 +1,42 @@
+﻿@model List<Matchletic.Models.Mec>
+@{
+    ViewData["Title"] = "Upravljaj mečevima";
+}
+
+<h1 class="text-2xl font-bold mb-6">Upravljaj mečevima</h1>
+
+<table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+    <thead>
+        <tr>
+            <th class="px-4 py-2 border-b">Naslov</th>
+            <th class="px-4 py-2 border-b">Datum</th>
+            <th class="px-4 py-2 border-b">Sport</th>
+            <th class="px-4 py-2 border-b">Kreator</th>
+            <th class="px-4 py-2 border-b">Status</th>
+            <th class="px-4 py-2 border-b">Akcije</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var mec in Model)
+        {
+            <tr>
+                <td class="px-4 py-2 border-b">@mec.Naslov</td>
+                <td class="px-4 py-2 border-b">@mec.DatumMeca.ToString("dd.MM.yyyy HH:mm")</td>
+                <td class="px-4 py-2 border-b">@mec.Sport?.Naziv</td>
+                <td class="px-4 py-2 border-b">@($"{mec.Kreator?.Ime} {mec.Kreator?.Prezime}")</td>
+                <td class="px-4 py-2 border-b">@mec.Status</td>
+                <td class="px-4 py-2 border-b space-x-2">
+                    <a href="@Url.Action("Edit", "Mec", new { id = mec.MecID, admin = true })"
+                       class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full text-sm font-medium">
+                        Uredi
+                    </a>
+                    <a href="@Url.Action("Delete", "Mec", new { id = mec.MecID, admin = true })"
+                       class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-full text-sm font-medium"
+                       onclick="return confirm('Jeste li sigurni da želite izbrisati ovaj meč?')">
+                        Izbriši
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

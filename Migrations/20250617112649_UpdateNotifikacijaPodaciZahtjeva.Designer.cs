@@ -4,6 +4,7 @@ using Matchletic.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Matchletic.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250617112649_UpdateNotifikacijaPodaciZahtjeva")]
+    partial class UpdateNotifikacijaPodaciZahtjeva
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -175,35 +178,6 @@ namespace Matchletic.Migrations
                     b.HasIndex("SportID");
 
                     b.ToTable("Mecevi");
-                });
-
-            modelBuilder.Entity("Matchletic.Models.MecConfirmation", b =>
-                {
-                    b.Property<int>("MecConfirmationID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MecConfirmationID"));
-
-                    b.Property<DateTime>("ConfirmedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsWinner")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("KorisnikID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MecID")
-                        .HasColumnType("int");
-
-                    b.HasKey("MecConfirmationID");
-
-                    b.HasIndex("KorisnikID");
-
-                    b.HasIndex("MecID");
-
-                    b.ToTable("MecConfirmations");
                 });
 
             modelBuilder.Entity("Matchletic.Models.MecKorisnik", b =>
@@ -718,25 +692,6 @@ namespace Matchletic.Migrations
                     b.Navigation("Sport");
                 });
 
-            modelBuilder.Entity("Matchletic.Models.MecConfirmation", b =>
-                {
-                    b.HasOne("Matchletic.Models.Korisnik", "Korisnik")
-                        .WithMany()
-                        .HasForeignKey("KorisnikID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Matchletic.Models.Mec", "Mec")
-                        .WithMany("MecConfirmations")
-                        .HasForeignKey("MecID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Korisnik");
-
-                    b.Navigation("Mec");
-                });
-
             modelBuilder.Entity("Matchletic.Models.MecKorisnik", b =>
                 {
                     b.HasOne("Matchletic.Models.Korisnik", "Korisnik")
@@ -872,8 +827,6 @@ namespace Matchletic.Migrations
             modelBuilder.Entity("Matchletic.Models.Mec", b =>
                 {
                     b.Navigation("KorisniciMeca");
-
-                    b.Navigation("MecConfirmations");
 
                     b.Navigation("Recenzije");
                 });

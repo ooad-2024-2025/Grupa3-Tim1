@@ -1,4 +1,5 @@
-﻿@* Views/Shared/_NotificationPartial.cshtml *@@using Matchletic.Models
+﻿@Html.AntiForgeryToken()
+@* Views/Shared/_NotificationPartial.cshtml *@@using Matchletic.Models
 @using Matchletic.Helpers
 @inject Matchletic.Services.NotifikacijaService NotifikacijaService
 
@@ -44,8 +45,8 @@
                 foreach (var notifikacija in notifikacije)
                 {
                     <a href="@notifikacija.Url"
-                       class="block px-4 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition @(!notifikacija.Procitano ? "bg-blue-50 dark:bg-blue-900/20" : "")"
-                       data-notification-id="@notifikacija.NotifikacijaID">
+                       onclick="return markAsReadAndRedirect(@notifikacija.NotifikacijaID, '@notifikacija.Url')"
+                       class="block px-4 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition @(!notifikacija.Procitano ? "bg-blue-50 dark:bg-blue-900/20" : "")">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 mr-3">
                                 @switch (notifikacija.Tip)

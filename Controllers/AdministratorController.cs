@@ -192,5 +192,38 @@ namespace Matchletic.Controllers
         {
             return _context.Korisnici.Any(e => e.KorisnikID == id);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendNotification(int korisnikId, string poruka)
+        {
+            // Provjeri da li je admin
+            var adminId = HttpContext.Session.GetInt32("KorisnikID");
+            if (adminId == null)
+                return RedirectToAction("Login", "Account", new { area = "Identity" });
+
+            var admin = await _context.Korisnici.FindAsync(adminId);
+            if (admin == null || !admin.JeAdmin)
+                return Forbid();
+
+            var korisnik = await _context.Korisnici.FindAsync(korisnikId);
+            if (korisnik == null)
+                return NotFound();
+
+            var notifikacija = new Notifikacija
+            {
+                KorisnikID = korisnikId,
+                Naslov = "Obavijest od administratora",
+                Sadrzaj = poruka,
+                DatumKreiranja = DateTime.Now,
+                Url = ""
+            };
+            _context.Notifikacije.Add(notifikacija);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Obavijest poslana!";
+            return RedirectToAction("Index");
+        }
+
     }
 }

@@ -23,19 +23,23 @@ namespace Matchletic.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly NotifikacijaService _notifikacijaService;
         private readonly MecRequestService _mecRequestService;
+        private readonly ILogger<MecController> _logger;
 
 
         public MecController(ApplicationDbContext context,
                              UserSyncService userSyncService,
                              UserManager<IdentityUser> userManager,
                              NotifikacijaService notifikacijaService,
-                             MecRequestService mecRequestService)
+                             MecRequestService mecRequestService,
+                             ILogger<MecController> logger)
+
         {
             _context = context;
             _userSyncService = userSyncService;
             _userManager = userManager;
             _notifikacijaService = notifikacijaService;
             _mecRequestService = mecRequestService;
+            _logger = logger;
         }
 
         // GET: Mec
@@ -265,7 +269,7 @@ namespace Matchletic.Controllers
                 var mec = new Mec
                 {
                     Naslov = Naslov ?? $"Mec za sport ID {SportID}",
-                    Opis = Opis ?? $"Lokacija: {Lokacija}, Broj igrača: {BrojIgraca}",
+                    Opis = Opis ?? string.Empty,
                     KreatorID = kreatorID.Value,
                     DatumKreiranja = DateTime.Now,
                     DatumMeca = datumMeca,
@@ -355,6 +359,17 @@ namespace Matchletic.Controllers
                 return Challenge();
             }
 
+            // Check if the user has already sent a request for this match
+            var postojeciZahtjev = await _context.MecRequests
+                .AnyAsync(r => r.MecID == id && r.KorisnikID == korisnikID && r.Status == MecRequestStatus.Ceka);
+
+            if (postojeciZahtjev)
+            {
+                // User has already sent a request, so don't allow direct join
+                TempData["InfoMessage"] = "Vaš zahtjev za ovaj meč čeka odobrenje.";
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
+
             var mec = await _context.Mecevi
                 .Include(m => m.KorisniciMeca)
                 .FirstOrDefaultAsync(m => m.MecID == id);
@@ -401,60 +416,54 @@ namespace Matchletic.Controllers
             return RedirectToAction(nameof(Details), new { id = id });
         }
 
-        // POST: Mec/MarkAsCompleted/5
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkAsCompleted(int id, string rezultat)
         {
-            // Get current user ID
-            var korisnikID = HttpContext.Session.GetInt32("KorisnikID");
+            _logger.LogInformation("MarkAsCompleted započeo za meč ID={MecId}", id);
 
-            // If session is not set but user is authenticated, try to sync and set it
-            if (korisnikID == null && User.Identity.IsAuthenticated)
+            // Get current user ID from Identity, NOT from session
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                var email = User.Identity.Name;
-                Console.WriteLine($"MarkAsCompleted: User is authenticated with email {email}, but no KorisnikID in session");
-
-                // Sync the user
-                await _userSyncService.SyncIdentityUser(email);
-
-                // Try to get the korisnikID again from the database
-                var korisnik = await _context.Korisnici.FirstOrDefaultAsync(k => k.Email == email);
-                if (korisnik != null)
-                {
-                    korisnikID = korisnik.KorisnikID;
-                    HttpContext.Session.SetInt32("KorisnikID", korisnikID.Value);
-                    HttpContext.Session.SetString("KorisnikIme", korisnik.Ime);
-                    Console.WriteLine($"MarkAsCompleted: Set KorisnikID in session to {korisnikID}");
-                }
-                else
-                {
-                    Console.WriteLine("MarkAsCompleted: Failed to find or create Korisnik");
-                    return Challenge();
-                }
-            }
-            else if (korisnikID == null)
-            {
-                Console.WriteLine("MarkAsCompleted: User is not authenticated and no KorisnikID in session");
+                _logger.LogWarning("MarkAsCompleted: Korisnik nije pronađen");
                 return Challenge();
             }
 
-            var mec = await _context.Mecevi.FindAsync(id);
+            var email = user.Email;
+            var korisnik = await _context.Korisnici.FirstOrDefaultAsync(k => k.Email == email);
+            if (korisnik == null)
+            {
+                _logger.LogWarning("MarkAsCompleted: Korisnik s emailom {Email} nije pronađen u bazi", email);
+                return Challenge();
+            }
+
+            var korisnikID = korisnik.KorisnikID;
+            _logger.LogInformation("MarkAsCompleted: Dohvaćen korisnik ID={KorisnikId}", korisnikID);
+
+            // First, load the match with all participants
+            var mec = await _context.Mecevi
+                .Include(m => m.KorisniciMeca)
+                .FirstOrDefaultAsync(m => m.MecID == id);
+
             if (mec == null)
             {
+                _logger.LogWarning("MarkAsCompleted: Meč ID={MecId} nije pronađen", id);
                 return NotFound();
             }
 
             // Check if user is the creator
             if (korisnikID != mec.KreatorID)
             {
+                _logger.LogWarning("MarkAsCompleted: Korisnik ID={KorisnikId} nije kreator meča ID={MecId}", korisnikID, id);
                 return Challenge();
             }
 
             // Check if match can be completed
             if (mec.Status != StatusMeca.Dogovoren)
             {
+                _logger.LogWarning("MarkAsCompleted: Meč ID={MecId} ima status {Status}, ne može se završiti", id, mec.Status);
                 return RedirectToAction(nameof(Details), new { id = id });
             }
 
@@ -462,11 +471,59 @@ namespace Matchletic.Controllers
             mec.Status = StatusMeca.Zavrsen;
             mec.Rezultat = rezultat;
 
-            _context.Update(mec);
-            await _context.SaveChangesAsync();
+            // Create MecConfirmation records for all participants
+            var participants = mec.KorisniciMeca.ToList();
+            foreach (var participant in participants)
+            {
+                var confirmation = new MecConfirmation
+                {
+                    MecID = id,
+                    KorisnikID = participant.KorisnikID,
+                    IsWinner = false,
+                    ConfirmedAt = DateTime.Now
+                };
 
-            return RedirectToAction(nameof(Details), new { id = id });
+                _context.MecConfirmations.Add(confirmation);
+                _logger.LogInformation("MarkAsCompleted: Kreiran MecConfirmation za korisnika ID={KorisnikId}", participant.KorisnikID);
+            }
+
+            _context.Update(mec);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("MarkAsCompleted: Uspješno spremljene promjene za meč ID={MecId}", id);
+
+                // Postavi vrijednost u TempData i u Cookie (kao rezervu)
+                TempData["AktivniTab"] = "zavrseni";
+                Response.Cookies.Append("AktivniTab", "zavrseni", new CookieOptions
+                {
+                    Expires = DateTimeOffset.Now.AddDays(1),
+                    IsEssential = true
+                });
+
+                // Postavi vrijednost u sesiju, ali s dodatnim loggingom
+                HttpContext.Session.SetString("AktivniTab", "zavrseni");
+                _logger.LogInformation("MarkAsCompleted: AktivniTab postavljen u sesiju na 'zavrseni'");
+
+                // Provjeri je li vrijednost stvarno postavljena
+                var testValue = HttpContext.Session.GetString("AktivniTab");
+                _logger.LogInformation("MarkAsCompleted: Provjera vrijednosti u sesiji - AktivniTab={TabValue}", testValue);
+
+                TempData["SuccessMessage"] = "Meč je uspješno označen kao završen!";
+                return RedirectToAction(nameof(MojiMecevi), new { tab = "zavrseni" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "MarkAsCompleted: Greška pri završavanju meča ID={MecId}", id);
+                TempData["ErrorMessage"] = "Greška pri završavanju meča. Molimo pokušajte ponovno.";
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
         }
+
+
+
+
 
         // POST: Mec/Edit/5
         [HttpPost]
@@ -622,8 +679,13 @@ namespace Matchletic.Controllers
 
             _context.Mecevi.Remove(mec);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            // Change this line from:
+            // return RedirectToAction(nameof(Index));
+            // To:
+            return RedirectToAction(nameof(MojiMecevi));
         }
+
 
         private bool MecExists(int id)
         {
@@ -642,15 +704,14 @@ namespace Matchletic.Controllers
             }
 
             // Get all public matches and private matches that include the current user
-            // Exclude matches that are completed (Status == Zavrsen)
+            // Exclude matches that are completed (Status == Zavrsen) or challenges (Status == CekaPrihvacanje)
             var sviMecevi = await _context.Mecevi
                 .Include(m => m.Sport)
                 .Include(m => m.Kreator)
                 .Include(m => m.KorisniciMeca)
                 .Where(m =>
-                    m.Status != StatusMeca.Zavrsen && // Exclude completed matches
-                    ((m.Status != StatusMeca.Dogovoren && !m.JePrivatan) ||
-                    (m.JePrivatan && m.KorisniciMeca.Any(km => km.KorisnikID == korisnikID)))
+                    m.Status == StatusMeca.Objavljen && // Only include published matches
+                    (!m.JePrivatan || (m.JePrivatan && m.KorisniciMeca.Any(km => km.KorisnikID == korisnikID)))
                 )
                 .OrderByDescending(m => m.DatumKreiranja)
                 .ToListAsync();
@@ -670,47 +731,200 @@ namespace Matchletic.Controllers
 
 
 
+
         // GET: Mec/MojiMecevi
         [Authorize]
-        public async Task<IActionResult> MojiMecevi(string tab = "aktivni")
+        public async Task<IActionResult> MojiMecevi(string tab = null)
         {
-            var korisnikID = HttpContext.Session.GetInt32("KorisnikID");
-            if (korisnikID == null)
+            _logger.LogInformation("MojiMecevi počinje izvršavanje, tab parametar={Tab}", tab);
+
+            // 1. Prioritet: Eksplicitni URL parametar
+            if (!string.IsNullOrEmpty(tab))
             {
+                _logger.LogInformation("MojiMecevi: Koristi eksplicitni tab parametar '{Tab}'", tab);
+                HttpContext.Session.SetString("AktivniTab", tab);
+                Response.Cookies.Append("AktivniTab", tab, new CookieOptions { Expires = DateTimeOffset.Now.AddDays(1), IsEssential = true });
+            }
+            // 2. Prioritet: Vrijednost iz TempData
+            else if (TempData["AktivniTab"] != null)
+            {
+                tab = TempData["AktivniTab"].ToString();
+                _logger.LogInformation("MojiMecevi: Koristi tab iz TempData '{Tab}'", tab);
+                HttpContext.Session.SetString("AktivniTab", tab);
+                Response.Cookies.Append("AktivniTab", tab, new CookieOptions { Expires = DateTimeOffset.Now.AddDays(1), IsEssential = true });
+            }
+            // 3. Prioritet: Vrijednost iz sesije
+            else if (HttpContext.Session.GetString("AktivniTab") != null)
+            {
+                tab = HttpContext.Session.GetString("AktivniTab");
+                _logger.LogInformation("MojiMecevi: Koristi tab iz sesije '{Tab}'", tab);
+            }
+            // 4. Prioritet: Vrijednost iz kolačića
+            else if (Request.Cookies.ContainsKey("AktivniTab"))
+            {
+                tab = Request.Cookies["AktivniTab"];
+                _logger.LogInformation("MojiMecevi: Koristi tab iz kolačića '{Tab}'", tab);
+                HttpContext.Session.SetString("AktivniTab", tab);
+            }
+            // Zadnji prioritet: Default vrijednost
+            else
+            {
+                tab = "svi";
+                _logger.LogInformation("MojiMecevi: Koristi default tab '{Tab}'", tab);
+            }
+
+            // Ostatak metode ostaje isti...
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                _logger.LogWarning("MojiMecevi: User nije pronađen");
                 return Challenge();
             }
 
-            // Get participating match IDs
-            var participatingMatchIds = _context.MeceviKorisnici
-                .Where(mk => mk.KorisnikID == korisnikID)
-                .Select(mk => mk.MecID);
+            var email = user.Email;
+            var korisnik = await _context.Korisnici.FirstOrDefaultAsync(k => k.Email == email);
+            if (korisnik == null)
+            {
+                Console.WriteLine("DEBUG: Korisnik nije pronađen u bazi");
+                return Challenge();
+            }
 
-            // Base query
-            var query = _context.Mecevi
+            var korisnikID = korisnik.KorisnikID;
+            Console.WriteLine($"DEBUG: KorisnikID u korisniku: {korisnikID}");
+
+            // Base query to get matches where the user is a participant
+            var baseQuery = _context.Mecevi
                 .Include(m => m.Sport)
                 .Include(m => m.Kreator)
                 .Include(m => m.KorisniciMeca)
-                .Where(m => participatingMatchIds.Contains(m.MecID));
+                .Where(m =>
+                    // User is the creator
+                    m.KreatorID == korisnikID ||
+                    // OR user is in the KorisniciMeca collection
+                    m.KorisniciMeca.Any(km => km.KorisnikID == korisnikID)
+                );
+
+            // Create separate collections for each tab, with appropriate filtering
+            List<Mec> allUserMatches;
 
             // Filter based on tab
-            if (tab == "zavrseni")
+            switch (tab)
             {
-                query = query.Where(m => m.Status == StatusMeca.Zavrsen);
-            }
-            else // "aktivni" tab or default
-            {
-                query = query.Where(m => m.Status != StatusMeca.Zavrsen);
+                case "zavrseni":
+                    Console.WriteLine($"DEBUG ZAVRSENI: KorisnikID={korisnikID}, počinjem dohvat mečeva...");
+
+                    // Get match IDs from MecConfirmation records for this user
+                    var confirmationMatchIds = await _context.MecConfirmations
+                        .Where(mc => mc.KorisnikID == korisnikID)
+                        .Select(mc => mc.MecID)
+                        .ToListAsync();
+
+                    Console.WriteLine($"DEBUG ZAVRSENI: Pronađeno {confirmationMatchIds.Count} MecConfirmation zapisa");
+                    foreach (var matchId in confirmationMatchIds)
+                    {
+                        Console.WriteLine($"DEBUG ZAVRSENI: MecConfirmation za MecID={matchId}");
+                    }
+
+                    // Get all matches that are either in the base query OR have a confirmation record
+                    var completedMatches = await _context.Mecevi
+                        .Include(m => m.Sport)
+                        .Include(m => m.Kreator)
+                        .Include(m => m.KorisniciMeca)
+                        .Where(m =>
+                            (m.Status == StatusMeca.Zavrsen &&
+                            (m.KreatorID == korisnikID || m.KorisniciMeca.Any(km => km.KorisnikID == korisnikID))) ||
+                            confirmationMatchIds.Contains(m.MecID))
+                        .OrderByDescending(m => m.DatumKreiranja)
+                        .ToListAsync();
+
+                    Console.WriteLine($"DEBUG ZAVRSENI: Pronađeno ukupno {completedMatches.Count} završenih mečeva");
+                    foreach (var match in completedMatches)
+                    {
+                        Console.WriteLine($"DEBUG ZAVRSENI: MecID={match.MecID}, Naslov='{match.Naslov}', " +
+                                          $"Status={match.Status}, KreatorID={match.KreatorID}, " +
+                                          $"BrojKorisnika={match.KorisniciMeca?.Count ?? 0}");
+
+                        // Provjeri je li korisnik sudionik
+                        bool jeKreator = match.KreatorID == korisnikID;
+                        bool jeSudionik = match.KorisniciMeca?.Any(km => km.KorisnikID == korisnikID) ?? false;
+
+                        Console.WriteLine($"DEBUG ZAVRSENI: MecID={match.MecID} - Korisnik je kreator: {jeKreator}, Korisnik je sudionik: {jeSudionik}");
+                    }
+
+                    allUserMatches = completedMatches;
+                    break;
+
+                case "kreirani":
+                    // Only matches created by the user, excluding completed ones
+                    allUserMatches = await baseQuery
+                        .Where(m => m.KreatorID == korisnikID && m.Status != StatusMeca.Zavrsen)
+                        .OrderByDescending(m => m.DatumKreiranja)
+                        .ToListAsync();
+                    break;
+
+                case "dogovoreni":
+                    // Only agreed matches
+                    allUserMatches = await baseQuery
+                        .Where(m => m.Status == StatusMeca.Dogovoren)
+                        .OrderByDescending(m => m.DatumKreiranja)
+                        .ToListAsync();
+                    break;
+
+                case "objavljeni":
+                    // Only published matches
+                    allUserMatches = await baseQuery
+                        .Where(m => m.Status == StatusMeca.Objavljen)
+                        .OrderByDescending(m => m.DatumKreiranja)
+                        .ToListAsync();
+                    break;
+
+                case "svi":
+                default:
+                    // All matches except completed ones
+                    allUserMatches = await baseQuery
+                        .Where(m => m.Status != StatusMeca.Zavrsen)
+                        .OrderByDescending(m => m.DatumKreiranja)
+                        .ToListAsync();
+                    break;
             }
 
-            var allUserMatches = await query
-                .OrderByDescending(m => m.DatumKreiranja)
+            // Get pending requests separately
+            var pendingRequestIds = await _context.MecRequests
+                .Where(r => r.KorisnikID == korisnikID && r.Status == MecRequestStatus.Ceka)
+                .Select(r => r.MecID)
                 .ToListAsync();
 
             ViewBag.CurrentUserId = korisnikID;
             ViewBag.SportOptions = await _context.Sportovi.ToListAsync();
             ViewBag.CurrentTab = tab;
+            ViewBag.PendingRequestIds = pendingRequestIds;
 
             return View(allUserMatches);
+        }
+
+
+
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public IActionResult SetAktivniTab(string tab)
+        {
+            if (!string.IsNullOrEmpty(tab))
+            {
+                HttpContext.Session.SetString("AktivniTab", tab);
+
+                // Također postavi kolačić kao rezervu
+                Response.Cookies.Append("activeTab", tab, new CookieOptions
+                {
+                    Path = "/",
+                    Expires = DateTimeOffset.Now.AddDays(1),
+                    HttpOnly = false,
+                    IsEssential = true
+                });
+            }
+            return Json(new { success = true, tab = tab });
         }
 
 
@@ -796,25 +1010,65 @@ namespace Matchletic.Controllers
                 rezultati.Add("STACK TRACE", ex.StackTrace);
             }
 
+            // Dodaj u TestDatabase metodu za provjeru MecConfirmation zapisa
+            rezultati.Add("6. Provjera MecConfirmation zapisa", "Pokušavam...");
+            try
+            {
+                var korisnikId = HttpContext.Session.GetInt32("KorisnikID");
+                if (korisnikId.HasValue)
+                {
+                    var mecConfirms = await _context.MecConfirmations
+                        .Where(mc => mc.KorisnikID == korisnikId)
+                        .ToListAsync();
+
+                    rezultati["6. Provjera MecConfirmation zapisa"] =
+                        $"Pronađeno {mecConfirms.Count} MecConfirmation zapisa za korisnika ID {korisnikId}";
+
+                    if (mecConfirms.Any())
+                    {
+                        var mecIds = mecConfirms.Select(mc => mc.MecID).ToList();
+                        var matchDetails = await _context.Mecevi
+                            .Where(m => mecIds.Contains(m.MecID))
+                            .Select(m => new { m.MecID, m.Naslov, m.Status })
+                            .ToListAsync();
+
+                        var matchInfo = string.Join(", ", matchDetails.Select(m =>
+                            $"ID: {m.MecID}, Naslov: {m.Naslov}, Status: {m.Status}"));
+
+                        rezultati.Add("7. Detalji potvrđenih mečeva", matchInfo);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                rezultati.Add("6. Greška pri provjeri MecConfirmation", ex.Message);
+            }
+
+
             return View(rezultati);
         }
 
-        // POST: Mec/CreateChallenge
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> CreateChallenge(int izazvaniKorisnikID, string Naslov, string Opis,
-            int SportID, string DatumVrijeme, string DatumVrijeme_Time, string Lokacija, bool JeIzazov)
+    int SportID, string DatumVrijeme, string DatumVrijeme_Time, string Lokacija, bool JeIzazov)
         {
             // Dohvati trenutnog korisnika (izazivač)
             var kreatorID = HttpContext.Session.GetInt32("KorisnikID");
+            Console.WriteLine($"DEBUG: CreateChallenge pokrenut - kreatorID={kreatorID}, izazvaniID={izazvaniKorisnikID}");
+
             if (kreatorID == null)
             {
+                Console.WriteLine("DEBUG: Kreator nije pronađen u sesiji");
                 return Challenge();
             }
 
             try
             {
+                // Dodajte detaljno zapisivanje za sve parametre
+                Console.WriteLine($"DEBUG: Parametri - Naslov={Naslov}, SportID={SportID}, Lokacija={Lokacija}");
+
                 // Parse date and time
                 var datumString = DatumVrijeme;
                 var vrijemeString = DatumVrijeme_Time;
@@ -822,6 +1076,7 @@ namespace Matchletic.Controllers
                 DateTime datum;
                 if (!DateTime.TryParse(datumString, out datum))
                 {
+                    Console.WriteLine($"DEBUG: Neispravan format datuma: {datumString}");
                     TempData["ErrorMessage"] = "Neispravan format datuma.";
                     return RedirectToAction("Index", "Korisnik");
                 }
@@ -829,64 +1084,97 @@ namespace Matchletic.Controllers
                 TimeSpan vrijeme;
                 if (!TimeSpan.TryParse(vrijemeString, out vrijeme))
                 {
+                    Console.WriteLine($"DEBUG: Neispravan format vremena: {vrijemeString}");
                     TempData["ErrorMessage"] = "Neispravan format vremena.";
                     return RedirectToAction("Index", "Korisnik");
                 }
 
                 // Combine date and time
                 DateTime datumMeca = datum.Add(vrijeme);
+                Console.WriteLine($"DEBUG: Datum meča: {datumMeca}");
 
-                // Kreiraj novi meč (tip izazov)
-                var mec = new Mec
+                // Ostalo ostaje isto, nastavite pratiti svaki korak
+                try
                 {
-                    Naslov = Naslov,
-                    Opis = Opis ?? $"Izazov između korisnika",
-                    KreatorID = kreatorID.Value,
-                    DatumKreiranja = DateTime.Now,
-                    DatumMeca = datumMeca,
-                    Lokacija = Lokacija,
-                    BrojIgraca = 2, // Fiksno na 2 za izazove
-                    SportID = SportID,
-                    Status = StatusMeca.CekaPrihvacanje, // Izazov čeka prihvaćanje
-                    Rezultat = "",
-                    JePrivatan = true, // Privatni meč
-                    KorisniciMeca = new List<MecKorisnik>
-            {
-                // Dodaj izazivača
-                new MecKorisnik
+                    // Kreiraj novi meč (tip izazov)
+                    var mec = new Mec
+                    {
+                        Naslov = Naslov,
+                        Opis = Opis ?? $"Izazov između korisnika",
+                        KreatorID = kreatorID.Value,
+                        DatumKreiranja = DateTime.Now,
+                        DatumMeca = datumMeca,
+                        Lokacija = Lokacija,
+                        BrojIgraca = 2, // Fiksno na 2 za izazove
+                        SportID = SportID,
+                        Status = StatusMeca.CekaPrihvacanje, // Izazov čeka prihvaćanje
+                        Rezultat = "",
+                        JePrivatan = true, // Privatni meč
+                        KorisniciMeca = new List<MecKorisnik>
                 {
-                    KorisnikID = kreatorID.Value,
-                    DatumMeca = DateTime.Now,
-                    JePrihvacen = true // Izazivač automatski prihvaća
+                    // Dodaj izazivača
+                    new MecKorisnik
+                    {
+                        KorisnikID = kreatorID.Value,
+                        DatumMeca = DateTime.Now,
+                        JePrihvacen = true // Izazivač automatski prihvaća
+                    }
                 }
-            }
-                };
+                    };
 
-                // Dodaj izazvanog korisnika sa statusom neprihvaćeno
-                mec.KorisniciMeca.Add(new MecKorisnik
+                    Console.WriteLine("DEBUG: Meč objekt kreiran, dodajem izazvanog korisnika");
+
+                    // Dodaj izazvanog korisnika sa statusom neprihvaćeno
+                    mec.KorisniciMeca.Add(new MecKorisnik
+                    {
+                        KorisnikID = izazvaniKorisnikID,
+                        DatumMeca = DateTime.Now,
+                        JePrihvacen = false // Izazvani korisnik još nije prihvatio
+                    });
+
+                    // Spremi u bazu
+                    Console.WriteLine("DEBUG: Spremam meč u bazu");
+                    _context.Mecevi.Add(mec);
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine($"DEBUG: Meč uspješno spremljen, ID: {mec.MecID}");
+
+                    Console.WriteLine("DEBUG: Kreiram notifikaciju izazova");
+                    var result = await _notifikacijaService.KreirajNotifikacijuIzazovaAsync(
+                        izazvaniKorisnikID,
+                        mec.MecID,
+                        kreatorID.Value);
+
+                    Console.WriteLine($"DEBUG: Rezultat kreiranja notifikacije: {result}");
+
+                    TempData["SuccessMessage"] = "Izazov je uspješno poslan! Čeka se prihvaćanje.";
+                    return RedirectToAction("MojiMecevi", "Mec");
+                }
+                catch (Exception ex)
                 {
-                    KorisnikID = izazvaniKorisnikID,
-                    DatumMeca = DateTime.Now,
-                    JePrihvacen = false // Izazvani korisnik još nije prihvatio
-                });
-
-                // Spremi u bazu
-                _context.Mecevi.Add(mec);
-                await _context.SaveChangesAsync();
-                await _notifikacijaService.KreirajNotifikacijuIzazovaAsync(
-                    izazvaniKorisnikID,
-                    mec.MecID,
-                    kreatorID.Value);
-
-                TempData["SuccessMessage"] = "Izazov je uspješno poslan! Čeka se prihvaćanje.";
-                return RedirectToAction("MojiMecevi", "Mec");
+                    Console.WriteLine($"DEBUG: Greška pri kreiranju meča: {ex.Message}");
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine($"DEBUG: Inner exception: {ex.InnerException.Message}");
+                    }
+                    Console.WriteLine($"DEBUG: Stack trace: {ex.StackTrace}");
+                    throw;
+                }
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"DEBUG: Vanjska greška u CreateChallenge: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"DEBUG: Inner exception: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"DEBUG: Stack trace: {ex.StackTrace}");
+
                 TempData["ErrorMessage"] = $"Greška prilikom slanja izazova: {ex.Message}";
                 return RedirectToAction("Index", "Korisnik");
             }
         }
+
+
 
         // POST: Mec/AcceptChallenge/5
         [Authorize]
@@ -954,7 +1242,7 @@ namespace Matchletic.Controllers
                 return Challenge();
             }
 
-            // Dohvati meč
+            // Dohvati meč s korisnicima
             var mec = await _context.Mecevi
                 .Include(m => m.KorisniciMeca)
                 .FirstOrDefaultAsync(m => m.MecID == id && m.Status == StatusMeca.CekaPrihvacanje);
@@ -972,32 +1260,26 @@ namespace Matchletic.Controllers
                 return RedirectToAction(nameof(MojiMecevi));
             }
 
-            // Ukloni korisnika iz meča
-            mec.KorisniciMeca.Remove(mecKorisnik);
-
-            // Ako je izazvani odbio, otkaži cijeli meč
-            if (mec.Status == StatusMeca.CekaPrihvacanje)
-            {
-                // Otkaži meč - samo izmijeni status ako želiš zadržati povijesne podatke
-                mec.Status = StatusMeca.Zavrsen;
-                mec.Rezultat = "Izazov odbijen";
-                _context.Update(mec);
-            }
-            else
-            {
-                // U ostalim slučajevima samo ukloni korisnika
-                _context.MeceviKorisnici.Remove(mecKorisnik);
-            }
-
-            await _context.SaveChangesAsync();
+            // Prvo, pošalji notifikaciju kreatoru da je izazov odbijen prije brisanja
             await _notifikacijaService.KreirajNotifikacijuOdbijenogIzazovaAsync(
                 mec.KreatorID,
                 id,
                 korisnikID.Value);
 
-            TempData["SuccessMessage"] = "Izazov je odbijen.";
+            // Umjesto da postavimo status na Zavrsen, potpuno brišemo meč iz baze
+            // Prvo, ukloni povezane MecKorisnik zapise
+            _context.MeceviKorisnici.RemoveRange(mec.KorisniciMeca);
+
+            // Zatim ukloni sam meč
+            _context.Mecevi.Remove(mec);
+
+            // Spremi promjene u bazi
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Izazov je odbijen i uklonjen.";
             return RedirectToAction(nameof(MojiMecevi));
         }
+
 
         // POST: Mec/PosaljiZahtjev/5
         [Authorize]
@@ -1123,7 +1405,17 @@ namespace Matchletic.Controllers
             return View(zahtjevi);
         }
 
+        // GET: Mec/Admin
+        public async Task<IActionResult> Admin()
+        {
+            // Prikaz svih mečeva sa povezanim podacima o kreatoru i sportu
+            var mecevi = await _context.Mecevi
+                .Include(m => m.Kreator)
+                .Include(m => m.Sport)
+                .ToListAsync();
 
+            return View(mecevi);
+        }
 
     }
 }

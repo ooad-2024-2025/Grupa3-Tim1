@@ -29,41 +29,37 @@
         </div>
     </div>
     
-    <div class="flex items-center space-x-4">
-        <!-- Dark Mode Toggle -->
-        <button onclick="toggleTheme()" class="theme-toggle mr-4 text-gray-500 hover:text-gray-700">
-            <i data-feather="moon" width="20" height="20" id="moon-icon"></i>
-            <i data-feather="sun" width="20" height="20" id="sun-icon" style="display: none;"></i>
-        </button>
+    <div class="flex items-center space-x-6 mr-4">
+    <!-- Dark Mode Toggle -->
+    <button onclick="toggleTheme()" class="theme-toggle mr-3 text-gray-500 hover:text-gray-700">
+        <i data-feather="moon" width="20" height="20" id="moon-icon"></i>
+        <i data-feather="sun" width="20" height="20" id="sun-icon" style="display: none;"></i>
+    </button>
 
-        @if (SignInManager.IsSignedIn(User))
-        {
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <div style="margin-right: 16px;">
             @await Html.PartialAsync("_NotificationPartial")
+        </div>
 
-            <a href="@Url.Action("Index", "Profil")" class="flex items-center space-x-2 group">
-                @if (!string.IsNullOrEmpty(profilnaSlika))
-                {
-                    <img src="@profilnaSlika"
-                         alt="@ime"
-                         class="w-8 h-8 rounded-full border-2 border-transparent group-hover:border-red-500 transition-all" />
-                }
-                else
-                {
-                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 border-2 border-transparent group-hover:border-red-500 transition-all">
-                        @ime[0]
-                    </div>
-                }
-                <span class="text-gray-700 group-hover:text-red-500 transition-colors">
-                    @ime
-                </span>
-            </a>
-
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                <button type="submit" class="text-gray-500 hover:text-red-500">
-                    <i data-feather="log-out" width="20" height="20"></i>
-                </button>
-            </form>
-        }
+        <a href="@Url.Action("Index", "Profil")" class="flex items-center space-x-2 group">
+            @if (!string.IsNullOrEmpty(profilnaSlika))
+            {
+                <img src="@profilnaSlika"
+                     alt="@ime"
+                     class="w-8 h-8 rounded-full border-2 border-transparent group-hover:border-red-500 transition-all" />
+            }
+            else
+            {
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 border-2 border-transparent group-hover:border-red-500 transition-all">
+                    @ime[0]
+                </div>
+            }
+            <span class="text-gray-700 group-hover:text-red-500 transition-colors">
+                @ime
+            </span>
+        </a>
+    }
         else
         {
             <!-- Zamijenite postojeće linkove s ovima -->

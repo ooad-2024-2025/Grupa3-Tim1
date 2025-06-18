@@ -1,36 +1,55 @@
-﻿@model List<Matchletic.Models.Mec>
+﻿@Html.AntiForgeryToken()
+<input type="hidden" id="currentTab" value="@ViewBag.CurrentTab" />
+
+@model List<Matchletic.Models.Mec>
 @{
     ViewData["Title"] = "Moji mečevi";
     var currentUserId = ViewBag.CurrentUserId;
     var sportOptions = ViewBag.SportOptions as List<Matchletic.Models.Sport>;
 
-    // Izazovi koje je korisnik kreirao
-    var mojiKreiraniMecevi = Model.Where(m => m.KreatorID == currentUserId).ToList();
-
-    // Filtriraj mečeve koji su vidljivi trenutnom korisniku
-    // Korisnik može vidjeti:
-    // 1. Mečeve koje je kreirao
-    // 2. Mečeve u kojima je prihvatio sudjelovanje
-    // 3. Javne mečeve u kojima sudjeluje
+    // Ispravni filter: Mečevi koje je korisnik kreirao ili u kojima sudjeluje
     var vidljiviMecevi = Model.Where(m =>
         m.KreatorID == currentUserId || // Mečevi koje je korisnik kreirao
-        (m.Status != StatusMeca.CekaPrihvacanje) || // Svi mečevi osim onih koji čekaju prihvaćanje
-        (m.Status == StatusMeca.CekaPrihvacanje && m.KorisniciMeca.Any(km => km.KorisnikID == currentUserId && km.JePrihvacen)) // Izazovi koje je korisnik prihvatio
+        m.KorisniciMeca.Any(km => km.KorisnikID == currentUserId) // Mečevi u kojima korisnik sudjeluje
     ).ToList();
 
+    // Izazove koji su kreirani
+    var mojiKreiraniMecevi = vidljiviMecevi.Where(m => m.KreatorID == currentUserId && m.Status != StatusMeca.Zavrsen).ToList();
+
+    // Helper za provjeru je li mec izazov
+    bool JeIzazov(Matchletic.Models.Mec m) =>
+        m.Status == StatusMeca.CekaPrihvacanje || (m.BrojIgraca == 2 && m.JePrivatan);
+
     // Pripremi mečeve po kategorijama za tabove
-    var objavljeniMecevi = vidljiviMecevi.Where(m => m.Status == StatusMeca.Objavljen).ToList();
+    var objavljeniMecevi = vidljiviMecevi.Where(m => m.Status == StatusMeca.Objavljen && !JeIzazov(m)).ToList();
     var dogovoreniMecevi = vidljiviMecevi.Where(m => m.Status == StatusMeca.Dogovoren).ToList();
     var zavrseniMecevi = vidljiviMecevi.Where(m => m.Status == StatusMeca.Zavrsen).ToList();
 
-    // Poseban tab za izazove (čekaju prihvaćanje)
-    var izazoviKreirani = mojiKreiraniMecevi.Where(m => m.Status == StatusMeca.CekaPrihvacanje).ToList();
+    // Izazovi koji su završeni prikazujemo i u "Završeni" tabu
+    var aktivniMecevi = vidljiviMecevi.Where(m => m.Status != StatusMeca.Zavrsen).ToList();
+
+    // Poseban tab za izazove
+    var izazoviKreirani = mojiKreiraniMecevi.Where(m =>
+        m.Status == StatusMeca.CekaPrihvacanje ||
+        (m.Status == StatusMeca.Dogovoren && m.BrojIgraca == 2 && m.JePrivatan)).ToList();
+
+    // Izazovi koje je korisnik primio i još nije prihvatio
     var izazoviPrimljeni = Model.Where(m =>
-        m.Status == StatusMeca.CekaPrihvacanje &&
+        (m.Status == StatusMeca.CekaPrihvacanje || (m.Status == StatusMeca.Dogovoren && m.BrojIgraca == 2 && m.JePrivatan)) &&
         m.KreatorID != currentUserId &&
         m.KorisniciMeca.Any(km => km.KorisnikID == currentUserId && !km.JePrihvacen)
     ).ToList();
+
+    // Dogovoreni izazovi koje je korisnik primio i prihvatio
+    var dogovoreniPrimljeniIzazovi = Model.Where(m =>
+        m.Status == StatusMeca.Dogovoren &&
+        m.BrojIgraca == 2 &&
+        m.JePrivatan &&
+        m.KreatorID != currentUserId &&
+        m.KorisniciMeca.Any(km => km.KorisnikID == currentUserId && km.JePrihvacen)
+    ).ToList();
 }
+
 
 <div class="flex justify-between items-center mb-8">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Moji mečevi</h1>
@@ -143,64 +162,25 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach (var mec in izazoviPrimljeni)
                 {
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border-2 border-yellow-400 dark:border-yellow-600">
-                        <div class="p-5">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h3 class="font-semibold text-gray-900 dark:text-white text-lg">@mec.Naslov</h3>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                                        <i data-feather="user" class="inline-block mr-1" width="14" height="14"></i>
-                                        Izazivač: @mec.Kreator.Ime @mec.Kreator.Prezime
-                                    </p>
-                                </div>
-                                <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 text-xs px-2 py-1 rounded-full font-medium">
-                                    Čeka odgovor
-                                </span>
-                            </div>
-
-                            <p class="text-gray-700 dark:text-gray-300 text-sm mb-4">@mec.Opis</p>
-
-                            <div class="grid grid-cols-2 gap-3 text-sm mb-4">
-                                <div>
-                                    <span class="block text-gray-500 dark:text-gray-400">Sport</span>
-                                    <span class="font-medium text-gray-900 dark:text-white">@mec.Sport.Naziv</span>
-                                </div>
-                                <div>
-                                    <span class="block text-gray-500 dark:text-gray-400">Lokacija</span>
-                                    <span class="font-medium text-gray-900 dark:text-white">@mec.Lokacija</span>
-                                </div>
-                                <div>
-                                    <span class="block text-gray-500 dark:text-gray-400">Datum</span>
-                                    <span class="font-medium text-gray-900 dark:text-white">@mec.DatumMeca.ToString("dd.MM.yyyy")</span>
-                                </div>
-                                <div>
-                                    <span class="block text-gray-500 dark:text-gray-400">Vrijeme</span>
-                                    <span class="font-medium text-gray-900 dark:text-white">@mec.DatumMeca.ToString("HH:mm")</span>
-                                </div>
-                            </div>
-
-                            <div class="flex space-x-2">
-                                <form asp-action="AcceptChallenge" asp-controller="Mec" method="post" class="flex-1">
-                                    <input type="hidden" name="id" value="@mec.MecID" />
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
-                                        Prihvati
-                                    </button>
-                                </form>
-                                <form asp-action="RejectChallenge" asp-controller="Mec" method="post" class="flex-1">
-                                    <input type="hidden" name="id" value="@mec.MecID" />
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">
-                                        Odbij
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    <partial name="_MatchCard" model="mec" />
                 }
             </div>
         </div>
     }
+
+    @if (dogovoreniPrimljeniIzazovi.Any())
+    {
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Dogovoreni izazovi</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var mec in dogovoreniPrimljeniIzazovi)
+                {
+                    <partial name="_MatchCard" model="mec" />
+                }
+            </div>
+        </div>
+    }
+
 
     <!-- Izazovi koje sam poslao -->
     @if (izazoviKreirani.Any())
@@ -216,7 +196,7 @@
         </div>
     }
 
-    @if (!izazoviPrimljeni.Any() && !izazoviKreirani.Any())
+    @if (!izazoviPrimljeni.Any() && !izazoviKreirani.Any() && !dogovoreniPrimljeniIzazovi.Any())
     {
         <div class="col-span-3 py-12 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -288,6 +268,8 @@
             <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Trenutno nemate završenih mečeva.</p>
         </div>
     }
+    <input type="hidden" id="currentTab" value="@ViewBag.CurrentTab" />
+
 </div>
 
 @section Scripts {
@@ -330,11 +312,68 @@
 
             // Show the selected container
             document.getElementById(tab + '-container').classList.remove('hidden');
+
+            // Spremite tab u sve mehanizme pohrane
+            sessionStorage.setItem('activeTab', tab);
+            localStorage.setItem('activeTab', tab);
+
+            // Ažurirajte URL parametar bez refresha stranice
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tab);
+            window.history.pushState({}, '', url);
+
+            // Dohvati anti-forgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            // Također ažurirajte tab u sesiji na serveru putem AJAX
+            fetch('/Mec/SetAktivniTab', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `tab=${tab}&__RequestVerificationToken=${token}`
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Tab uspješno postavljen na serveru:', tab);
+                } else {
+                    console.error('Greška pri postavljanju taba na serveru');
+                }
+            })
+            .catch(error => {
+                console.error('AJAX greška:', error);
+            });
         }
 
-        // Initialize feather icons when the page loads
+        // Na učitavanju stranice
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicijaliziraj ikone
             feather.replace();
+
+            // Pronađi tab koji treba prikazati po prioritetima
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+
+            if (tabParam) {
+                // 1. Prioritet: URL parametar
+                switchTab(tabParam);
+            } else if (sessionStorage.getItem('activeTab')) {
+                // 2. Prioritet: Session Storage
+                switchTab(sessionStorage.getItem('activeTab'));
+            } else if (localStorage.getItem('activeTab')) {
+                // 3. Prioritet: Local Storage
+                switchTab(localStorage.getItem('activeTab'));
+            } else if (document.getElementById('currentTab').value) {
+                // 4. Prioritet: Vrijednost s backenda
+                switchTab(document.getElementById('currentTab').value);
+            }
+
+            // Debug ispis za pregled stanja
+            console.log('Current tab from ViewBag:', document.getElementById('currentTab').value);
+            console.log('Session Storage activeTab:', sessionStorage.getItem('activeTab'));
+            console.log('Local Storage activeTab:', localStorage.getItem('activeTab'));
+            console.log('Anti-forgery token exists:', !!document.querySelector('input[name="__RequestVerificationToken"]'));
         });
     </script>
 }

@@ -3,6 +3,14 @@
 @using Matchletic.Data
 @using Matchletic.Models
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+        <p class="font-bold">Greška!</p>
+        <p class="text-sm">@TempData["ErrorMessage"]</p>
+    </div>
+}
+
 <!DOCTYPE html>
 <html lang="en" class="light">
 <head>
@@ -16,8 +24,18 @@
     <link rel="stylesheet" href="~/css/dark-mode.css" />
     <script src="https://unpkg.com/feather-icons"></script>
 
+    <script>
+        // Provjerite i ispišite stanje sesije i kolačića pri svakom učitavanju stranice
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[Layout] Session Storage activeTab:', sessionStorage.getItem('activeTab'));
+            console.log('[Layout] Cookie activeTab:', document.cookie.match('(^|;)\\s*activeTab\\s*=\\s*([^;]+)')?.pop() || '');
+            console.log('[Layout] All cookies:', document.cookie);
+        });
+    </script>
+
     <!-- Dodajte inline skriptu za rano postavljanje teme prije renderiranja stranice -->
     <script>
+
         // Postavlja temu prije renderiranja stranice
         (function() {
             // Dohvati pohranjenu temu
@@ -79,6 +97,18 @@
             html.dark .dark\:hover\:text-red-400:hover {
                 color: #f87171 !important;
             }
+            /* Za tamnije crvenu pozadinu u delete potvrdi */
+            html.dark .dark\:bg-red-900\/30 {
+                background-color: rgba(153, 27, 27, 0.3) !important; /* Tamnije crvena s više opaciteta */
+            }
+            /* Za svjetliju ikonicu u delete potvrdi */
+            html.dark .dark\:text-red-400 {
+                color: #f87171 !important; /* Svjetlije crvena */
+            }
+            /* Za tamnije rubove u delete potvrdi */
+            html.dark .dark\:border-red-800\/50 {
+                border-color: rgba(127, 29, 29, 0.5) !important;
+            }
         }
     </style>
 
@@ -116,7 +146,7 @@
 
     <script>
         // Funkcija za primjenu teme
-                function applyTheme(theme) {
+        function applyTheme(theme) {
             const html = document.documentElement;
             const moonIcon = document.getElementById('moon-icon');
             const sunIcon = document.getElementById('sun-icon');
@@ -167,6 +197,33 @@
             // Inicijaliziraj ikone
             feather.replace();
         });
+
+        // Funkcija za označavanje notifikacije kao pročitane i preusmjeravanje
+        function markAsReadAndRedirect(notificationId, url) {
+            // Pripremi CSRF token za slanje
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            // Pošalji AJAX zahtjev za oznaku kao pročitano
+            $.ajax({
+                url: '/Notifikacija/OznaciKaoProcitano',
+                type: 'POST',
+                data: {
+                    id: notificationId,
+                    __RequestVerificationToken: token
+                },
+                success: function() {
+                    // Nakon uspješnog označavanja, preusmjeri korisnika
+                    window.location.href = url;
+                },
+                error: function() {
+                    // Ako dođe do greške, svejedno preusmjeri
+                    window.location.href = url;
+                }
+            });
+
+            // Spriječi default ponašanje linka
+            return false;
+        }
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

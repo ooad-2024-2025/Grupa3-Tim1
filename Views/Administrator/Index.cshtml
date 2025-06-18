@@ -95,13 +95,14 @@
                         </div>
 
                         <div class="flex space-x-2">
-                            <a href="@Url.Action("SendNotification", "Administrator", new { id = user.KorisnikID })"
-                               class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-full transition-colors text-sm font-medium flex items-center">
+                            <button type="button"
+                                    class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-full transition-colors text-sm font-medium flex items-center"
+                                    onclick="openNotificationModal(@user.KorisnikID, '@(user.Ime + " " + user.Prezime)')">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 Pošalji obavijest
-                            </a>
+                            </button>
                             <a href="@Url.Action("RestrictUser", "Administrator", new { id = user.KorisnikID })"
                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-full transition-colors text-sm font-medium flex items-center"
                                onclick="return confirm('Jeste li sigurni da želite ograničiti ovog korisnika?')">
@@ -226,6 +227,23 @@
     </div>
 </div>
 
+<div id="notificationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-transparent hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-lg font-semibold mb-4">Pošalji obavijest <span id="modalUserName" class="font-normal"></span></h3>
+        <form id="notificationForm" method="post" action="@Url.Action("SendNotification", "Administrator")">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="korisnikId" id="modalKorisnikId" />
+            <div class="mb-4">
+                <textarea name="poruka" id="modalPoruka" rows="3" class="w-full border rounded px-3 py-2" placeholder="Unesite poruku..." required></textarea>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeNotificationModal()" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Odustani</button>
+                <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Pošalji</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         document.getElementById('searchInput').addEventListener('input', function(e) {
@@ -253,5 +271,14 @@
                 }
             });
         });
+            function openNotificationModal(korisnikId, userName) {
+            document.getElementById('modalKorisnikId').value = korisnikId;
+            document.getElementById('modalUserName').textContent = userName;
+            document.getElementById('modalPoruka').value = '';
+            document.getElementById('notificationModal').classList.remove('hidden');
+        }
+        function closeNotificationModal() {
+            document.getElementById('notificationModal').classList.add('hidden');
+        }
     </script>
 }

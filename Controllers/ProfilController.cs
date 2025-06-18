@@ -247,21 +247,22 @@ namespace Matchletic.Controllers
         // POST: Profil/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("KorisnikID,Ime,Prezime,Email,ProfilnaSlika")] Korisnik korisnik, IFormFile profilnaSlika, int[] odabraniSportovi)
+        public async Task<IActionResult> Edit(int id, [Bind("KorisnikID,Ime,Prezime,Email,Lokacija")] Korisnik korisnik, IFormFile profilnaSlika, int[] odabraniSportovi)
         {
+            // Osnovna validacija
             if (id != korisnik.KorisnikID)
             {
                 return NotFound();
             }
 
-            // Get current user ID
+            // Provjera trenutnog korisnika
             var korisnikID = HttpContext.Session.GetInt32("KorisnikID");
             if (korisnikID == null || korisnikID != id)
             {
                 return Challenge();
             }
 
-            // Remove validation errors for collections
+            // Ukloni validacijske greške za kolekcije
             ModelState.Remove("KorisnickiSportovi");
             ModelState.Remove("MeceviKorisnika");
             ModelState.Remove("NapisaneRecenzije");
@@ -270,12 +271,13 @@ namespace Matchletic.Controllers
             ModelState.Remove("Aktivan");
             ModelState.Remove("JeAdmin");
             ModelState.Remove("Ocjena");
+            ModelState.Remove("ProfilnaSlika");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Get existing user with collections
+                    // 1. Dohvati postojećeg korisnika
                     var postojeciKorisnik = await _context.Korisnici
                         .Include(k => k.KorisnickiSportovi)
                         .FirstOrDefaultAsync(k => k.KorisnikID == id);
@@ -285,7 +287,7 @@ namespace Matchletic.Controllers
                         return NotFound();
                     }
 
-                    // Upload profilne slike ako je postavljena
+                    // 2. Postavi profilnu sliku ako je učitana
                     if (profilnaSlika != null && profilnaSlika.Length > 0)
                     {
                         var uploadDir = Path.Combine(_hostEnvironment.WebRootPath, "images/profil");
@@ -302,36 +304,45 @@ namespace Matchletic.Controllers
                             await profilnaSlika.CopyToAsync(stream);
                         }
 
-                        // Set profile image path
                         postojeciKorisnik.ProfilnaSlika = "/images/profil/" + fileName;
                     }
 
-                    // Update basic info
+                    // 3. Ažuriraj osnovne podatke
                     postojeciKorisnik.Ime = korisnik.Ime;
                     postojeciKorisnik.Prezime = korisnik.Prezime;
                     postojeciKorisnik.Email = korisnik.Email;
+                    postojeciKorisnik.Lokacija = korisnik.Lokacija;
 
-                    // Update sports
-                    if (odabraniSportovi != null && odabraniSportovi.Length > 0)
-                    {
-                        // Remove existing sports
-                        _context.KorisnickiSportovi.RemoveRange(postojeciKorisnik.KorisnickiSportovi);
-
-                        // Add selected sports
-                        foreach (var sportId in odabraniSportovi)
-                        {
-                            postojeciKorisnik.KorisnickiSportovi.Add(new KorisnikSport
-                            {
-                                KorisnikID = postojeciKorisnik.KorisnikID,
-                                SportID = sportId
-                            });
-                        }
-                    }
-
+                    // 4. Spremi promjene za korisnika
                     _context.Update(postojeciKorisnik);
                     await _context.SaveChangesAsync();
 
-                    // Update Identity user email if changed
+                    // 5. Obriši postojeće sportove
+                    var trenutniSportovi = await _context.KorisnickiSportovi
+                        .Where(ks => ks.KorisnikID == id)
+                        .ToListAsync();
+
+                    if (trenutniSportovi.Any())
+                    {
+                        _context.KorisnickiSportovi.RemoveRange(trenutniSportovi);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // 6. Dodaj nove sportove
+                    if (odabraniSportovi != null && odabraniSportovi.Length > 0)
+                    {
+                        foreach (var sportId in odabraniSportovi)
+                        {
+                            _context.KorisnickiSportovi.Add(new KorisnikSport
+                            {
+                                KorisnikID = id,
+                                SportID = sportId
+                            });
+                        }
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // 7. Ažuriraj identity korisnika ako je promijenjen email
                     if (User.Identity.Name != korisnik.Email)
                     {
                         var identityUser = await _userManager.FindByEmailAsync(User.Identity.Name);
@@ -343,27 +354,26 @@ namespace Matchletic.Controllers
                         }
                     }
 
-                    // Update session
+                    // 8. Ažuriraj sesiju
                     HttpContext.Session.SetString("KorisnikIme", postojeciKorisnik.Ime);
 
+                    TempData["SuccessMessage"] = "Vaš profil je uspješno ažuriran!";
                     return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception ex)
                 {
-                    if (!_context.Korisnici.Any(k => k.KorisnikID == id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("", $"Greška pri ažuriranju profila: {ex.Message}");
                 }
             }
 
+            // Ako dođemo do ovdje, nešto je pošlo po zlu - prikaži formu ponovno
             ViewBag.Sportovi = new MultiSelectList(_context.Sportovi, "SportID", "Naziv", odabraniSportovi);
             return View(korisnik);
         }
+
+
+
+
 
         // GET: Profil/Sportovi
         // GET: Profil/Sportovi

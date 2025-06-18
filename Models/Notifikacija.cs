@@ -20,7 +20,7 @@ namespace Matchletic.Models
 
         public string Url { get; set; }
 
-        public string PodaciZahtjeva { get; set; }
+        public string PodaciZahtjeva { get; set; } = "";
 
         public NotifikacijaTip Tip { get; set; }
 
