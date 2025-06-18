@@ -87,46 +87,35 @@ namespace Matchletic.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("MecID,Ocjena,Komentar")] Recenzija recenzija)
+        public async Task<IActionResult> Create([Bind("Ocjena,Komentar")] Recenzija recenzija)
         {
-            // Get current user ID
             var korisnikID = HttpContext.Session.GetInt32("KorisnikID");
             if (korisnikID == null)
             {
                 return Challenge();
             }
 
-            // Set the author to the current user
+            // Postavi autorID prije validacije
             recenzija.AutorID = korisnikID.Value;
 
-            // Validate that the user is a participant in the match
-            var mec = await _context.Mecevi
-                .Include(m => m.KorisniciMeca)
-                .FirstOrDefaultAsync(m => m.MecID == recenzija.MecID);
-
-            if (mec == null || mec.Status != StatusMeca.Zavrsen || 
-                !mec.KorisniciMeca.Any(km => km.KorisnikID == korisnikID))
+            // Ako je meč odabran kroz dropdown ili hidden polje, postavi MecID
+            if (Request.Form["MecID"].Count > 0)
             {
-                ModelState.AddModelError("", "Ne možete recenzirati ovaj meč.");
-                return View(recenzija);
+                int mecId;
+                if (int.TryParse(Request.Form["MecID"], out mecId))
+                {
+                    recenzija.MecID = mecId;
+                }
             }
-
-            // Check if user already reviewed this match
-            var existingReview = await _context.Recenzije
-                .AnyAsync(r => r.MecID == recenzija.MecID && r.AutorID == korisnikID);
-            if (existingReview)
-            {
-                ModelState.AddModelError("", "Već ste recenzirali ovaj meč.");
-                return View(recenzija);
-            }
-
+              ModelState.Remove("Mec");
+    ModelState.Remove("Autor");
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Add(recenzija);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction("Details", "Mec", new { id = recenzija.MecID });
+                    return RedirectToAction("Details", new { id = recenzija.RecenzijaID });
                 }
                 catch (Exception ex)
                 {

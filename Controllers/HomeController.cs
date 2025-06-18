@@ -37,6 +37,9 @@ namespace Matchletic.Controllers
                 .Take(6) // Limit to 6 most recent
                 .ToListAsync();
 
+            // Ukupan broj svih objavljenih mečeva
+            ViewBag.Objavljeni = await _context.Mecevi.CountAsync(m => m.Status == StatusMeca.Objavljen);
+
             // If user is authenticated, get their matches counts
             if (korisnikID.HasValue)
             {
@@ -45,7 +48,8 @@ namespace Matchletic.Controllers
                     .Where(m => m.KorisniciMeca.Any(km => km.KorisnikID == korisnikID))
                     .ToListAsync();
 
-                ViewBag.Objavljeni = userMecevi.Count(m => m.Status == StatusMeca.Objavljen);
+                // Broj objavljenih mečeva koje je korisnik kreirao
+                ViewBag.Objavljeni = userMecevi.Count(m => m.Status == StatusMeca.Objavljen && m.KreatorID == korisnikID);
                 ViewBag.Dogovoreni = userMecevi.Count(m => m.Status == StatusMeca.Dogovoren);
                 ViewBag.Zavrseni = userMecevi.Count(m => m.Status == StatusMeca.Zavrsen);
 

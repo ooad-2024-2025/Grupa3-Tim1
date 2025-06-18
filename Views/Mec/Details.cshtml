@@ -196,6 +196,11 @@
                             Pridruži se
                         </button>
                     </form>
+
+                    <button type="button" onclick="openChallengeModal()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                        <i data-feather="zap" class="mr-2 inline" width="16" height="16"></i>
+                        Izazovi na match
+                    </button>
                 }
 
                 @if (isCreator && Model.Status == StatusMeca.Dogovoren)
@@ -303,47 +308,6 @@
         </div>
     }
 
-    @if (Model.Recenzije != null && Model.Recenzije.Any())
-    {
-        <div class="bg-white rounded-xl shadow-sm p-6 md:p-8">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                <i data-feather="star" class="mr-3 text-yellow-500" width="24" height="24"></i>
-                Recenzije (@Model.Recenzije.Count)
-            </h2>
-
-            <div class="space-y-6">
-                @foreach (var recenzija in Model.Recenzije)
-                {
-                    <div class="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
-                        <div class="flex items-center mb-3">
-                            @if (!string.IsNullOrEmpty(recenzija.Autor?.ProfilnaSlika))
-                            {
-                                <img src="@recenzija.Autor.ProfilnaSlika" alt="@recenzija.Autor.Ime" class="w-10 h-10 rounded-full mr-3 object-cover border-2 border-white shadow" />
-                            }
-                            else
-                            {
-                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 border-2 border-white shadow">
-                                    <span class="text-blue-500 font-bold">@(recenzija.Autor?.Ime.FirstOrDefault() ?? '?')</span>
-                                </div>
-                            }
-                            <div>
-                                <div class="font-medium text-gray-900">@(recenzija.Autor?.Ime ?? "Nepoznat") @(recenzija.Autor?.Prezime ?? "korisnik")</div>
-                                <div class="flex text-yellow-400">
-                                    @for (int i = 1; i <= 5; i++)
-                                    {
-                                        <i data-feather="@(i <= recenzija.Ocjena ? "star" : "star")" class="@(i <= recenzija.Ocjena ? "text-yellow-400" : "text-gray-300")" width="16" height="16"></i>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ml-13 pl-10">
-                            <p class="text-gray-700 bg-gray-50 p-4 rounded-lg rounded-tl-none">@recenzija.Komentar</p>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
 </div>
 
 <partial name="_CompleteMecModal" />
@@ -362,5 +326,74 @@
         function closeCompleteMecModal() {
             document.getElementById('completeMecModal').classList.add('hidden');
         }
+
+        function openChallengeModal() {
+            // Get the current match details
+            const mecId = @Model.MecID;
+            const sportId = @Model.SportID;
+            const naslov = "@Model.Naslov";
+            const opis = "@Model.Opis";
+            const lokacija = "@Model.Lokacija";
+            const datumMeca = "@Model.DatumMeca.ToString("yyyy-MM-dd")";
+            const vrijemeMeca = "@Model.DatumMeca.ToString("HH:mm")";
+
+            // Open the challenge modal with pre-filled data
+            const modal = document.getElementById('challengeModal');
+            if (modal) {
+                // Pre-fill the form fields
+                document.getElementById('SportID').value = sportId;
+                document.getElementById('Naslov').value = naslov;
+                document.getElementById('Opis').value = opis;
+                document.getElementById('Lokacija').value = lokacija;
+                document.getElementById('DatumVrijeme').value = datumMeca;
+                document.getElementById('DatumVrijeme_Time').value = vrijemeMeca;
+                document.getElementById('JeIzazov').checked = true;
+
+                // Show the modal
+                modal.classList.remove('hidden');
+            }
+        }
     </script>
 }
+<!-- Recenzije sekcija -->
+@if (Model.Recenzije?.Any() ?? false)
+{
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4 flex items-center">
+            <i data-feather="star" class="mr-2 text-yellow-500" width="24" height="24"></i>
+            Recenzije (@Model.Recenzije.Count)
+        </h2>
+
+        <div class="space-y-6">
+            @foreach (var recenzija in Model.Recenzije)
+            {
+                <div class="border-b pb-6">
+                    <div class="flex items-center mb-2">
+                        @if (!string.IsNullOrEmpty(recenzija.Autor?.ProfilnaSlika))
+                        {
+                            <img src="@recenzija.Autor.ProfilnaSlika" alt="@recenzija.Autor.Ime" class="w-10 h-10 rounded-full mr-3 object-cover border-2 border-white shadow" />
+                        }
+                        else
+                        {
+                            <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center mr-3 font-bold">
+                                @(recenzija.Autor?.Ime?.FirstOrDefault() ?? '?')
+                            </div>
+                        }
+                        <div>
+                            <div class="font-semibold">@recenzija.Autor?.Ime @recenzija.Autor?.Prezime</div>
+                            <div class="flex text-yellow-400">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i data-feather="@(i <= recenzija.Ocjena ? "star" : "star")" class="@(i <= recenzija.Ocjena ? "text-yellow-400" : "text-gray-300")" width="16" height="16"></i>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 mt-2 bg-gray-50 p-4 rounded-lg">@recenzija.Komentar</p>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@await Html.PartialAsync("_ChallengeModal", Model.Kreator)

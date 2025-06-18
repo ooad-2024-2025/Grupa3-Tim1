@@ -140,7 +140,10 @@ namespace Matchletic.Controllers
                 values.Add(activity?.Count ?? 0);
             }
 
-            ViewBag.ZavrseniMecevi = korisnikProfil.MeceviKorisnika.Select(mk => mk.Mec).ToList();
+            ViewBag.ZavrseniMecevi = korisnikProfil.MeceviKorisnika
+                .Select(mk => mk.Mec)
+                .Where(m => m.Status == StatusMeca.Zavrsen)
+                .ToList();
             ViewBag.KreiraniMecevi = _context.Mecevi.Count(m => m.KreatorID == korisnikID);
             ViewBag.MatchesPlayed = korisnikProfil.MeceviKorisnika.Select(mk => mk.Mec).ToList();
             ViewBag.WinRate = winRate;

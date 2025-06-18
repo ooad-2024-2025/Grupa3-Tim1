@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Matchletic.Models
 {
@@ -13,8 +14,10 @@ namespace Matchletic.Models
 
         public string Komentar { get; set; }
 
+        [BindNever]
         public int MecID { get; set; }
 
+        [BindNever]
         public int AutorID { get; set; }
 
         // Navigation properties

@@ -75,8 +75,10 @@ namespace Matchletic.Controllers
                 .Include(m => m.Sport)
                 .Include(m => m.Kreator)
                 .Include(m => m.KorisniciMeca)
-                .ThenInclude(km => km.Korisnik)
+                .ThenInclude(mk => mk.Korisnik)
                 .Include(m => m.MecConfirmations)
+                .Include(m => m.Recenzije)
+                .ThenInclude(r => r.Autor)
                 .FirstOrDefaultAsync(m => m.MecID == id);
 
             if (mec == null)
@@ -687,29 +689,16 @@ namespace Matchletic.Controllers
                 return Challenge();
             }
 
-            // Get participating match IDs
+            // Dohvati SVE mečeve u kojima korisnik sudjeluje
             var participatingMatchIds = _context.MeceviKorisnici
                 .Where(mk => mk.KorisnikID == korisnikID)
                 .Select(mk => mk.MecID);
 
-            // Base query
-            var query = _context.Mecevi
+            var allUserMatches = await _context.Mecevi
                 .Include(m => m.Sport)
                 .Include(m => m.Kreator)
                 .Include(m => m.KorisniciMeca)
-                .Where(m => participatingMatchIds.Contains(m.MecID));
-
-            // Filter based on tab
-            if (tab == "zavrseni")
-            {
-                query = query.Where(m => m.Status == StatusMeca.Zavrsen);
-            }
-            else // "aktivni" tab or default
-            {
-                query = query.Where(m => m.Status != StatusMeca.Zavrsen);
-            }
-
-            var allUserMatches = await query
+                .Where(m => participatingMatchIds.Contains(m.MecID))
                 .OrderByDescending(m => m.DatumKreiranja)
                 .ToListAsync();
 

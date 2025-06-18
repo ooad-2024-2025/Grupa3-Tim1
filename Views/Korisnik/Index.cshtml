@@ -98,14 +98,21 @@
     }
 </div>
 
+<!-- Container za modal -->
+<div id="challengeModalContainer"></div>
+
 @section Scripts {
     <script>
         function showChallengeModal(korisnikId) {
             $.get('@Url.Action("GetChallengeModal", "Korisnik")/' + korisnikId, function(data) {
                 $('#challengeModalContainer').html(data);
-                $('#challengeModal').modal('show');
+                $('#challengeModal').removeClass('hidden');
                 feather.replace();
             });
+        }
+
+        function closeChallengeModal() {
+            $('#challengeModal').addClass('hidden');
         }
     </script>
 }

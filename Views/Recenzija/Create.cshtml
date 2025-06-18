@@ -58,6 +58,16 @@
                         </button>
                     </div>
                 </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="text-red-600">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@error.ErrorMessage</div>
+                        }
+                    </div>
+                }
             </form>
         </div>
     </div>
