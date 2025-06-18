@@ -471,21 +471,7 @@ namespace Matchletic.Controllers
             mec.Status = StatusMeca.Zavrsen;
             mec.Rezultat = rezultat;
 
-            // Create MecConfirmation records for all participants
-            var participants = mec.KorisniciMeca.ToList();
-            foreach (var participant in participants)
-            {
-                var confirmation = new MecConfirmation
-                {
-                    MecID = id,
-                    KorisnikID = participant.KorisnikID,
-                    IsWinner = false,
-                    ConfirmedAt = DateTime.Now
-                };
-
-                _context.MecConfirmations.Add(confirmation);
-                _logger.LogInformation("MarkAsCompleted: Kreiran MecConfirmation za korisnika ID={KorisnikId}", participant.KorisnikID);
-            }
+            
 
             _context.Update(mec);
 
@@ -814,17 +800,7 @@ namespace Matchletic.Controllers
                 case "zavrseni":
                     Console.WriteLine($"DEBUG ZAVRSENI: KorisnikID={korisnikID}, počinjem dohvat mečeva...");
 
-                    // Get match IDs from MecConfirmation records for this user
-                    var confirmationMatchIds = await _context.MecConfirmations
-                        .Where(mc => mc.KorisnikID == korisnikID)
-                        .Select(mc => mc.MecID)
-                        .ToListAsync();
-
-                    Console.WriteLine($"DEBUG ZAVRSENI: Pronađeno {confirmationMatchIds.Count} MecConfirmation zapisa");
-                    foreach (var matchId in confirmationMatchIds)
-                    {
-                        Console.WriteLine($"DEBUG ZAVRSENI: MecConfirmation za MecID={matchId}");
-                    }
+                    
 
                     // Get all matches that are either in the base query OR have a confirmation record
                     var completedMatches = await _context.Mecevi
@@ -833,8 +809,7 @@ namespace Matchletic.Controllers
                         .Include(m => m.KorisniciMeca)
                         .Where(m =>
                             (m.Status == StatusMeca.Zavrsen &&
-                            (m.KreatorID == korisnikID || m.KorisniciMeca.Any(km => km.KorisnikID == korisnikID))) ||
-                            confirmationMatchIds.Contains(m.MecID))
+                            (m.KreatorID == korisnikID || m.KorisniciMeca.Any(km => km.KorisnikID == korisnikID))))
                         .OrderByDescending(m => m.DatumKreiranja)
                         .ToListAsync();
 
@@ -1010,39 +985,7 @@ namespace Matchletic.Controllers
                 rezultati.Add("STACK TRACE", ex.StackTrace);
             }
 
-            // Dodaj u TestDatabase metodu za provjeru MecConfirmation zapisa
-            rezultati.Add("6. Provjera MecConfirmation zapisa", "Pokušavam...");
-            try
-            {
-                var korisnikId = HttpContext.Session.GetInt32("KorisnikID");
-                if (korisnikId.HasValue)
-                {
-                    var mecConfirms = await _context.MecConfirmations
-                        .Where(mc => mc.KorisnikID == korisnikId)
-                        .ToListAsync();
-
-                    rezultati["6. Provjera MecConfirmation zapisa"] =
-                        $"Pronađeno {mecConfirms.Count} MecConfirmation zapisa za korisnika ID {korisnikId}";
-
-                    if (mecConfirms.Any())
-                    {
-                        var mecIds = mecConfirms.Select(mc => mc.MecID).ToList();
-                        var matchDetails = await _context.Mecevi
-                            .Where(m => mecIds.Contains(m.MecID))
-                            .Select(m => new { m.MecID, m.Naslov, m.Status })
-                            .ToListAsync();
-
-                        var matchInfo = string.Join(", ", matchDetails.Select(m =>
-                            $"ID: {m.MecID}, Naslov: {m.Naslov}, Status: {m.Status}"));
-
-                        rezultati.Add("7. Detalji potvrđenih mečeva", matchInfo);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                rezultati.Add("6. Greška pri provjeri MecConfirmation", ex.Message);
-            }
+            
 
 
             return View(rezultati);

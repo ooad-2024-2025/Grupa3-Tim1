@@ -294,3 +294,4 @@ D:\Ismail\ETF\DrugaGodina\CetvrtiSemestar\ObjektnoOrijetisanaAnalizaIDizajn\Matc
 D:\Ismail\ETF\DrugaGodina\CetvrtiSemestar\ObjektnoOrijetisanaAnalizaIDizajn\Matchletic\obj\Debug\net8.0\Matchletic.sourcelink.json
 D:\Ismail\ETF\DrugaGodina\CetvrtiSemestar\ObjektnoOrijetisanaAnalizaIDizajn\Matchletic\bin\Debug\net8.0\Microsoft.AspNetCore.Identity.UI.dll
 D:\Ismail\ETF\DrugaGodina\CetvrtiSemestar\ObjektnoOrijetisanaAnalizaIDizajn\Matchletic\obj\Debug\net8.0\Matchletic.MvcApplicationPartsAssemblyInfo.cs
+D:\Ismail\ETF\DrugaGodina\CetvrtiSemestar\ObjektnoOrijetisanaAnalizaIDizajn\Matchletic\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

@@ -22,9 +22,6 @@ namespace Matchletic.Data
         public DbSet<Postignuce> Postignuca { get; set; }
         public DbSet<KorisnikPostignuce> KorisnikPostignuca { get; set; }
 
-        public DbSet<MecConfirmation> MecConfirmations { get; set; }
-
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

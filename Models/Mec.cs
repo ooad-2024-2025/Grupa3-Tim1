@@ -54,6 +54,5 @@ namespace Matchletic.Models
 
         public virtual ICollection<Recenzija> Recenzije { get; set; }
 
-        public ICollection<MecConfirmation> MecConfirmations { get; set; } = new List<MecConfirmation>();
     }
 }
